@@ -3,3 +3,4 @@
 
 2. Updated README with project description.
 
+3. Have created three personas.
