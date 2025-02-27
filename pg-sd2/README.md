@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # MySQL, PHPMyAdmin and Node.js (ready for Express development)
 
 This will install Mysql and phpmyadmin (including all dependencies to run Phpmyadmin) AND node.js
@@ -57,15 +56,3 @@ Once in the database container, you can get a MySQL CLI in the usual way
 ```bash
 mysql -uroot -p<password> 
 ```
-=======
-# RRRewear
-1. RRRewear: Redefining Fashion Sustainably RRRewear transforms pre-loved garments into stylish, eco-friendly fashion statements. Our mission is to reduce textile waste by upcycling old clothing. Join us in creating a greener future, one rewear at a time. Let's make a positive impact on our planet while looking fabulous! 🌍✨
-
-2. Updated README with project description.
-
-3. Have created three personas.
-
-4. Help in project description.s
-
-5. Help to write ethical issue.
->>>>>>> 20b29c7aae1e756b50db0f76683f7f4e55c211a0
