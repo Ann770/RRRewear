@@ -14,20 +14,20 @@ app.use(express.static("static"));
 // Get the functions in the db.js file to use
 const db = require('./services/db');
 
-// Create a route for root
+// Create a route for root - /
 app.get("/", function(req, res) {
-    res.render("index");
+    // Set up an array of data
+    var test_data = ['one', 'two', 'three', 'four'];
+    // Send the array through to the template as a variable called data
+    res.render("index", {'title':'My index page', 'heading':'My heading', 'data':test_data});
 });
-
-
 
 // Create a route for testing the db
 app.get("/db_test", function(req, res) {
     // Assumes a table called test_table exists in your database
     sql = 'select * from test_table';
     db.query(sql).then(results => {
-        console.log(results);
-        res.send(results)
+        res.render("db_test", { title: "Database Test", data: results });
     });
 });
 
@@ -52,3 +52,17 @@ app.get("/hello/:name", function(req, res) {
 app.listen(3000,function(){
     console.log(`Server running at http://127.0.0.1:3000/`);
 });
+
+//new route for profile
+app.get("/profile", function (req, res) {
+    res.render("profile");
+});
+
+// Route to display all students in a formatted way using Pug
+app.get("/all-students", function(req, res) {
+    var sql = "SELECT * FROM Students";
+    db.query(sql).then((results) => {
+        res.render("all-students", { title: "All Students", students: results });
+    });
+});
+

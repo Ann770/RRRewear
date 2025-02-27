@@ -1,5 +1,8 @@
 extends layout
 
 block content
-    h1 Heading here...
-    p first paragraph xxx
+    h1 #{heading}
+    p First paragraph xxx
+    p Now let's loop:
+    each item in data  
+        p #{item}

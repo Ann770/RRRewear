@@ -1,0 +1,12 @@
+extends layout
+
+block content
+    h1 #{title}
+    table(border=1)
+        tr
+            th ID
+            th Name
+        each row in data
+            tr
+                td #{row.id}
+                td #{row.name}
