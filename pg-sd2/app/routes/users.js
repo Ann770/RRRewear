@@ -1,5 +1,5 @@
 const express = require("express");
-const db = require("../config/db");
+const db = require("../../config/db");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 
@@ -29,4 +29,3 @@ router.post("/login", async (req, res) => {
 });
 
 module.exports = router;
-

@@ -1,28 +1,39 @@
-version: '3.3'
+version: "3.3"
 services:
   web:
     build:
       context: ./
     volumes:
       - .:/src
-    command: supervisor -e  'js,pug,html' index.js
+    command: supervisor -e 'js,pug,html' index.js
     ports:
       - "3000:3000"
     depends_on:
       - db
+
   db:
-    image: mysql
+    image: mysql:latest
     restart: always
-    env_file:
-      - ./.env
+    environment:
+      MYSQL_ROOT_PASSWORD: fakepassword
+      MYSQL_DATABASE: sd2-db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: fakepassword
     ports:
       - "3308:3306"
     volumes:
-      - ./db:/var/lib/mysql
+      - db_data:/var/lib/mysql  # Use a named volume to avoid losing data
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     restart: always
-    env_file:
-      - ./.env
+    environment:
+      PMA_HOST: localhost  # ✅ This ensures phpMyAdmin connects to MySQL inside Docker
+      MYSQL_ROOT_PASSWORD: fakepassword
     ports:
       - "8081:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:  # Named volume for MySQL to persist data safely

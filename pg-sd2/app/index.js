@@ -1,8 +1,10 @@
 const express = require("express");
-const db = require("../config/db");
 const dotenv = require("dotenv");
 const path = require("path");
+const session = require("express-session");
+const fileUpload = require("express-fileupload");
 
+// Load environment variables
 dotenv.config();
 
 const app = express();
@@ -11,37 +13,35 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload());
+app.use(
+  session({
+    secret: "mysecretkey",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "../statics")));
+app.use(express.static("statics"));
 
-// Import Routes
-const userRoutes = require("./routes/users");
-const listingRoutes = require("./routes/listings");
-const swapRequestRoutes = require("./routes/swap_requests");
-const messagingRoutes = require("./routes/messages");
-const paymentRoutes = require("./routes/payment");
-const adminRoutes = require("./routes/admin");
-const wishlistRoutes = require("./routes/wishlist");
-const searchRoutes = require("./routes/search");
-const matchingRoutes = require("./routes/matching");
+// Routes
+app.use("/users", require("./routes/users"));
+app.use("/listings", require("./routes/listings"));
+app.use("/swap_requests", require("./routes/swap_requests"));
+app.use("/messages", require("./routes/messages"));
+app.use("/payment", require("./routes/payment"));
+app.use("/admin", require("./routes/admin"));
+app.use("/wishlist", require("./routes/wishlist"));
+app.use("/search", require("./routes/search"));
+app.use("/matching", require("./routes/matching"));
 
-app.use("/users", userRoutes);
-app.use("/listings", listingRoutes);
-app.use("/swap_requests", swapRequestRoutes);
-app.use("/messages", messagingRoutes);
-app.use("/payment", paymentRoutes);
-app.use("/admin", adminRoutes);
-app.use("/wishlist", wishlistRoutes);
-app.use("/search", searchRoutes);
-app.use("/matching", matchingRoutes);
-
-// Home Route
+// Homepage Route
 app.get("/", (req, res) => {
-    res.render("index", { title: "RRRewear - Circular Fashion Swap" });
+  res.render("index", { title: "PG-SD2 - Circular Fashion Swap" });
 });
 
-// Start Server
+// Start the server
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

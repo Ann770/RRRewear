@@ -1,0 +1,14 @@
+doctype html
+html
+  head
+    title Users List
+    link(rel="stylesheet", href="/statics/main.css")
+  body
+    header
+      h1 Users List
+      a(href="/") Home
+    main
+      ul
+        each user in users
+          li
+            a(href="/profile/" + user.id) #{user.name}
