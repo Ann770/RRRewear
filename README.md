@@ -5,6 +5,9 @@
 
 3. Have created three personas.
 
+<<<<<<< HEAD
 4. Help in project description.s
 
 5. Help to write ethical issue.
+=======
+>>>>>>> 279fcd0b10e09a9689d98a510e7fdc7edd49d985
