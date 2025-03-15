@@ -1,0 +1,16 @@
+doctype html
+html
+  head
+    title Listings
+    link(rel="stylesheet", href="/statics/main.css")
+  body
+    header
+      h1 Available Listings
+      a(href="/") Home
+    main
+      ul
+        each listing in listings
+          li
+            a(href="/listings/" + listing.id)
+              img(src=listing.image_url, alt=listing.item_name)
+              p #{listing.item_name} - #{listing.size} - #{listing.category}

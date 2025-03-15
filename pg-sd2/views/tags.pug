@@ -1,0 +1,13 @@
+doctype html
+html
+  head
+    title Tags and Categories
+    link(rel="stylesheet", href="/statics/main.css")
+  body
+    header
+      h1 Tags and Categories
+      a(href="/") Home
+    main
+      ul
+        each tag in tags
+          li #{tag.name}
