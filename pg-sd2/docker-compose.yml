@@ -1,8 +1,9 @@
-version: "3.3"
+version: "3.3"  # It is good to explicitly set the version (optional)
+
 services:
   web:
     build:
-      context: ./
+      context: ./  # Keep the build context as is
     volumes:
       - .:/src
     command: supervisor -e 'js,pug,html' index.js
@@ -10,30 +11,36 @@ services:
       - "3000:3000"
     depends_on:
       - db
+    environment:
+      MYSQL_HOST: db
+      DB_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASS: fakepassword
+      MYSQL_DATABASE: rrrewear  # Ensure this matches your MySQL DB name
 
   db:
     image: mysql:latest
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: fakepassword
-      MYSQL_DATABASE: sd2-db
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: fakepassword
+      MYSQL_DATABASE: rrrewear
+      MYSQL_USER: root
+      MYSQL_PASSWORD: fakepassword  # Ensure password matches what is set in `web` service
     ports:
-      - "3308:3306"
+      - "3306:3306"  # Exposing MySQL service on port 3306
     volumes:
-      - db_data:/var/lib/mysql  # Use a named volume to avoid losing data
+      - db_data:/var/lib/mysql  # Persist database data across restarts
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     restart: always
     environment:
-      PMA_HOST: localhost  # ✅ This ensures phpMyAdmin connects to MySQL inside Docker
-      MYSQL_ROOT_PASSWORD: fakepassword
+      PMA_HOST: db  # Connect to the MySQL database inside the Docker container
+      MYSQL_ROOT_PASSWORD: fakepassword  # Use root password as per `db` service
     ports:
-      - "8081:80"
+      - "8081:80"  # Exposing phpMyAdmin on port 8081
     depends_on:
       - db
 
 volumes:
-  db_data:  # Named volume for MySQL to persist data safely
+  db_data:  # Define the named volume for MySQL to persist data safely

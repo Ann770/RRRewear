@@ -1,10 +1,10 @@
 const express = require("express");
 const db = require("../../config/db");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+//const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 const router = express.Router();
 
 // Create a payment intent
-router.post("/create-payment-intent", async (req, res) => {
+/*router.post("/create-payment-intent", async (req, res) => {
     const { amount, currency } = req.body;
     try {
         const paymentIntent = await stripe.paymentIntents.create({
@@ -15,9 +15,9 @@ router.post("/create-payment-intent", async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-});
+});*/
 
-// Save transaction details
+/* Save transaction details
 router.post("/save-transaction", async (req, res) => {
     const { user_id, amount, status } = req.body;
     try {
@@ -29,6 +29,6 @@ router.post("/save-transaction", async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-});
+});*/
 
 module.exports = router;

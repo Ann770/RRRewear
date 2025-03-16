@@ -1,24 +1,36 @@
 {
-  "name": "sd2-example",
+  "name": "rrrewear",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "RRRewear - Circular Fashion Swap Platform",
+  "main": "app/app.js",
   "scripts": {
-    "start": "supervisor index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app/app.js",
+    "dev": "nodemon app/app.js"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "express-fileupload": "^1.5.1",
-    "express-session": "^1.18.1",
-    "mysql": "^2.18.1",
-    "mysql2": "^2.3.0",
-    "sqlite3": "^5.0.2",
-    "stripe": "^17.7.0",
-    "supervisor": "^0.12.0"
-  }
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.0",
+    "express-session": "^1.17.3",
+    "mysql2": "^3.3.0",
+    "pug": "^3.0.2",
+    "stripe": "^12.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "fashion",
+    "swap",
+    "sustainability",
+    "express",
+    "pug"
+  ],
+  "author": "Shistata, Ann, Nihal",
+  "license": "MIT"
 }

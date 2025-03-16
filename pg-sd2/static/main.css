@@ -2,11 +2,12 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #f4f4f4; /* Surface Background */
+    color: #000; /* Default text color */
 }
 
 header {
-    background: #333;
+    background: #2C7A89; /* Main Brand Colour */
     color: white;
     padding: 10px;
     text-align: center;
@@ -28,7 +29,7 @@ li {
 .button {
     display: inline-block;
     padding: 10px 20px;
-    background: #28a745;
+    background: #28a745; /* Accept Green */
     color: white;
     text-decoration: none;
     border-radius: 5px;
@@ -36,4 +37,46 @@ li {
 
 .button:hover {
     background: #218838;
+}
+
+/* Additional buttons based on color scheme */
+.button-black {
+    background: #000; /* Black Button */
+    color: white;
+}
+
+.button-red {
+    background: #C62828; /* Decline Red */
+    color: white;
+}
+
+.button-blue {
+    background: #1976D2; /* Blue */
+    color: white;
+}
+
+.button:hover {
+    opacity: 0.9;
+}
+
+/* Navigation styling */
+nav ul {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    background: #D3D3D3; /* Grey Colour */
+}
+
+nav ul li {
+    margin: 0 10px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #000; /* Black text */
+    font-weight: bold;
+}
+
+nav ul li a:hover {
+    color: #1976D2; /* Blue for hover effect */
 }
