@@ -1,0 +1,22 @@
+doctype html
+html
+  head
+    title= title
+    link(rel="stylesheet", href="/statics/main.css")
+  body
+    header
+      h1= user.name
+      nav
+        ul
+          li: a(href="/users") Users
+          li: a(href="/listings") Listings
+          li: a(href="/wishlist") Wishlist
+          li: a(href="/messages") Messages
+          li: a(href="/swap_requests") Swap Requests
+    main
+      h2 Profile
+      p Email:= user.email
+      p Location:= user.location
+      a(href="/users/edit") Edit Profile
+    footer
+      p &copy; 2025 RRRewear - Sustainable Fashion

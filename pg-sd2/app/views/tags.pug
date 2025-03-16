@@ -1,0 +1,24 @@
+doctype html
+html
+  head
+    title= title
+    link(rel="stylesheet", href="/statics/main.css")
+  body
+    header
+      h1 Tags - RRRewear
+      nav
+        ul
+          li: a(href="/users") Users
+          li: a(href="/listings") Listings
+          li: a(href="/wishlist") Wishlist
+          li: a(href="/messages") Messages
+          li: a(href="/swap_requests") Swap Requests
+    main
+      h2 Available Tags/Categories
+      each tag in tags
+        div.tag
+          h3= tag.name
+          p= tag.description
+          a(href=`/tags/${tag.id}`) View Tag
+    footer
+      p &copy; 2025 RRRewear - Sustainable Fashion

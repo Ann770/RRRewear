@@ -1,0 +1,21 @@
+doctype html
+html
+  head
+    title= title
+    link(rel="stylesheet", href="/statics/main.css")
+  body
+    header
+      h1= listing.title
+      nav
+        ul
+          li: a(href="/users") Users
+          li: a(href="/listings") Listings
+          li: a(href="/wishlist") Wishlist
+          li: a(href="/messages") Messages
+          li: a(href="/swap_requests") Swap Requests
+    main
+      p= listing.description
+      p Price: $= listing.price
+      a(href="/swap_requests") Request Swap
+    footer
+      p &copy; 2025 RRRewear - Sustainable Fashion

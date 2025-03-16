@@ -1,3 +1,4 @@
+/* Global Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -6,77 +7,179 @@ body {
     color: #000; /* Default text color */
 }
 
+/* Header */
 header {
     background: #2C7A89; /* Main Brand Colour */
     color: white;
-    padding: 10px;
+    padding: 20px;
     text-align: center;
 }
 
-ul {
-    list-style: none;
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+header nav {
+    margin-top: 10px;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
     padding: 0;
+    list-style: none;
 }
 
-li {
-    background: white;
-    margin: 10px;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+nav ul li {
+    margin: 0 20px;
 }
 
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+nav ul li a:hover {
+    color: #FFD700; /* Gold for hover effect */
+}
+
+/* Button Styles */
 .button {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 12px 25px;
     background: #28a745; /* Accept Green */
     color: white;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    transition: background 0.3s ease;
 }
 
 .button:hover {
     background: #218838;
 }
 
-/* Additional buttons based on color scheme */
-.button-black {
-    background: #000; /* Black Button */
-    color: white;
-}
-
+/* Button for Decline */
 .button-red {
     background: #C62828; /* Decline Red */
     color: white;
 }
 
-.button-blue {
-    background: #1976D2; /* Blue */
-    color: white;
+.button-red:hover {
+    background: #b71c1c;
 }
 
-.button:hover {
-    opacity: 0.9;
-}
-
-/* Navigation styling */
-nav ul {
-    display: flex;
-    justify-content: center;
+/* Form Input Fields */
+input, select, textarea {
     padding: 10px;
-    background: #D3D3D3; /* Grey Colour */
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-nav ul li {
-    margin: 0 10px;
+input[type="submit"] {
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
 }
 
-nav ul li a {
-    text-decoration: none;
-    color: #000; /* Black text */
-    font-weight: bold;
+input[type="submit"]:hover {
+    background-color: #218838;
 }
 
-nav ul li a:hover {
-    color: #1976D2; /* Blue for hover effect */
+/* Card Layout for Product Listings */
+.card {
+    background: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+/* Flexbox Layout for Product Grid */
+.products-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.product-item {
+    flex: 1 1 calc(33% - 20px);
+    margin: 10px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Page Styling */
+.profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+}
+
+.profile img {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.profile .user-info {
+    font-size: 1.2rem;
+}
+
+/* Footer */
+footer {
+    background-color: #2C7A89;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+footer p {
+    font-size: 1rem;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .products-grid {
+        flex-direction: column;
+    }
+
+    .product-item {
+        flex: 1 1 100%;
+    }
 }
