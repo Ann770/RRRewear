@@ -3,11 +3,11 @@ const dotenv = require("dotenv");
 const path = require("path");
 const session = require("express-session");
 const fileUpload = require("express-fileupload");
+const app = express();
 
 // Load environment variables
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -56,5 +56,5 @@ app.use((req, res, next) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(` RRRewear server running at http://localhost:${PORT}`);
+  console.log(`RRRewear server running at http://localhost:${PORT}`);
 });
