@@ -1,0 +1,59 @@
+extends layout
+
+block content
+  .categories-header
+    h1 Browse Categories
+    p Discover clothing items by category
+
+  .grid
+    each category in categories
+      .category-card
+        img.category-image(src=category.image_url || "/images/placeholder.jpg", alt=category.name)
+        .category-info
+          h2= category.name
+          p= category.description
+          .category-meta
+            span.items #{category.listing_count} items available
+          a.btn.btn-primary(href=`/categories/${category.id}`) Browse #{category.name}
+
+  .category-descriptions
+    h2 About Our Categories
+    .category-info-grid
+      .category-info-item
+        h3 Tops
+        p Browse through shirts, blouses, t-shirts, and other upper body garments. Perfect for building your sustainable wardrobe.
+      
+      .category-info-item
+        h3 Bottoms
+        p Find pants, skirts, shorts, and other lower body garments. All in various styles and sizes.
+      
+      .category-info-item
+        h3 Dresses
+        p Discover one-piece garments for any occasion. From casual to formal, find the perfect dress.
+      
+      .category-info-item
+        h3 Outerwear
+        p Stay warm and stylish with our collection of jackets, coats, and other outer garments.
+      
+      .category-info-item
+        h3 Accessories
+        p Complete your look with jewelry, bags, scarves, and other accessories.
+
+  .category-stats
+    h2 Category Statistics
+    .stats-grid
+      .stat-item
+        h3 Total Items
+        p= totalItems || 0
+      .stat-item
+        h3 Active Swaps
+        p= activeSwaps || 0
+      .stat-item
+        h3 Community Members
+        p= totalUsers || 0
+
+  .popular-tags
+    h2 Popular Tags
+    .tags-cloud
+      each tag in popular_tags
+        a.tag(href=`/tags/${tag.name}`) #{tag.name} (#{tag.count}) 

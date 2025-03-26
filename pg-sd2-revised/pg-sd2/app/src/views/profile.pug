@@ -1,0 +1,78 @@
+extends layout
+
+block content
+  .profile-container
+    .sidebar
+      .nav-options
+        a.nav-item.active(href="/profile")
+          i.fas.fa-user
+          span My Profile
+        a.nav-item(href="/closet")
+          i.fas.fa-tshirt
+          span My Closet
+        a.nav-item(href="/wishlist")
+          i.fas.fa-heart
+          span Wish List
+        a.nav-item(href="/swap-requests")
+          i.fas.fa-exchange-alt
+          span Swap Requests
+        a.nav-item(href="/logout")
+          i.fas.fa-sign-out-alt
+          span Logout
+
+    .main-content
+      .profile-header
+        .profile-picture
+          img#profile-image(src=user.avatar || "/images/default-avatar.jpg", alt="Profile Picture")
+          form#avatar-form(action="/profile/me" method="POST" enctype="multipart/form-data")
+            input#avatar-input(type="file" name="avatar" accept="image/*" style="display: none")
+            button.edit-picture(type="button")
+              i.fas.fa-camera
+        .profile-info
+          h1 #{user.name}
+          .location
+            i.fas.fa-map-marker-alt
+            span #{user.location}
+          .email
+            i.fas.fa-envelope
+            span #{user.email}
+          .rating
+            i.fas.fa-star
+            span #{user.rating}/5
+          button.edit-profile Edit Profile
+      .divider
+      .my-closet
+        h2 My Closet
+        .products-grid
+          each product in products
+            .product-card
+              img(src=product.image, alt=product.name)
+              .product-info
+                h3 #{product.name}
+                p #{product.category}
+                .product-meta
+                  span.size #{product.size}
+                  span.condition #{product.condition}
+
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      const avatarInput = document.getElementById('avatar-input');
+      const avatarForm = document.getElementById('avatar-form');
+      const profileImage = document.getElementById('profile-image');
+      const editButton = document.querySelector('.edit-picture');
+
+      editButton.addEventListener('click', function() {
+        avatarInput.click();
+      });
+
+      avatarInput.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            profileImage.src = e.target.result;
+            avatarForm.submit();
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        }
+      });
+    }); 

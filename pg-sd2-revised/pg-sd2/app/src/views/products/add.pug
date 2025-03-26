@@ -1,0 +1,93 @@
+extends ../layout
+
+block content
+  .add-product-container
+    h1.add-product-title Add New Product
+    .add-product-form
+      .product-image-upload
+        .upload-box
+          i.fas.fa-camera
+          span Upload Photo
+          input#image-upload(type="file" name="image" accept="image/*" style="display: none")
+      
+      .product-details-form
+        form(action="/products/add" method="POST" enctype="multipart/form-data")
+          .form-group
+            label(for="name") Product Name
+            input#name.form-control(type="text" name="name" required)
+          
+          .form-group
+            label(for="brand") Brand
+            select#brand.form-select(name="brand" required)
+              option(value="") Select Brand
+              option(value="1") Nike
+              option(value="2") Adidas
+              option(value="3") Zara
+              option(value="4") H&M
+              option(value="5") Uniqlo
+          
+          .form-group
+            label(for="category") Category
+            select#category.form-select(name="category" required)
+              option(value="") Select Category
+              option(value="1") Women
+              option(value="2") Men
+              option(value="3") Accessories
+              option(value="4") Shoes
+              option(value="5") Bags
+          
+          .form-group
+            label(for="size") Size
+            select#size.form-select(name="size" required)
+              option(value="") Select Size
+              option(value="XS") XS
+              option(value="S") S
+              option(value="M") M
+              option(value="L") L
+              option(value="XL") XL
+              option(value="XXL") XXL
+          
+          .form-group
+            label(for="condition") Condition
+            select#condition.form-select(name="condition" required)
+              option(value="") Select Condition
+              option(value="new") New
+              option(value="like_new") Like New
+              option(value="good") Good
+              option(value="fair") Fair
+              option(value="poor") Poor
+          
+          .form-group
+            label(for="material") Material
+            input#material.form-control(type="text" name="material" required)
+          
+          .form-group
+            label(for="color") Color
+            input#color.form-control(type="text" name="color" required)
+          
+          .form-group
+            label(for="description") Description
+            textarea#description.form-control(name="description" rows="4" required)
+          
+          button.upload-button(type="submit") Upload Product
+
+  script.
+    document.querySelector('.product-image-upload').addEventListener('click', function() {
+      document.getElementById('image-upload').click();
+    });
+
+    document.getElementById('image-upload').addEventListener('change', function(e) {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          const uploadBox = document.querySelector('.upload-box');
+          uploadBox.innerHTML = `
+            <img src="${e.target.result}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+          `;
+        }
+        
+        reader.readAsDataURL(file);
+      }
+    }); 

@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  .login-container
+    .login-box
+      h1 Login
+      if error_msg
+        .alert.alert-error #{error_msg}
+      if success_msg
+        .alert.alert-success #{success_msg}
+      
+      form.login-form(action="/login" method="POST")
+        .form-group
+          label(for="email") Email
+          input#email(type="email" name="email" required)
+        
+        .form-group
+          label(for="password") Password
+          input#password(type="password" name="password" required)
+        
+        button.login-button(type="submit") Login
+      
+      .register-link
+        p Don't have an account? 
+          a(href="/register") Register here 

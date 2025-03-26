@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - RRRewear</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="/" class="logo">
+                <h1>RRRewear</h1>
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/categories/women">Women</a></li>
+                    <li><a href="/categories/men">Men</a></li>
+                </ul>
+            </nav>
+            <div class="nav-icons">
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="user-profile-dropdown">
+                    <div class="profile-trigger">
+                        <img src="images/avatar-placeholder.jpg" alt="Profile">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu">
+                        <div class="profile-menu-header">
+                            <h3>John Doe</h3>
+                            <p>john.doe@example.com</p>
+                        </div>
+                        <div class="profile-menu-items">
+                            <a href="/profile" class="profile-menu-item">
+                                <i class="fas fa-user"></i>
+                                My Profile
+                            </a>
+                            <a href="/closet" class="profile-menu-item">
+                                <i class="fas fa-tshirt"></i>
+                                My Closet
+                            </a>
+                            <a href="/swaps" class="profile-menu-item">
+                                <i class="fas fa-sync"></i>
+                                My Swaps
+                            </a>
+                            <a href="/settings" class="profile-menu-item">
+                                <i class="fas fa-cog"></i>
+                                Settings
+                            </a>
+                            <a href="/logout" class="profile-menu-item">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="users-page">
+        <!-- Users Header -->
+        <div class="users-header">
+            <h1>Community Members</h1>
+            <div class="users-search">
+                <input type="text" placeholder="Search users..." id="user-search">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Users Filters -->
+        <div class="users-filters">
+            <select id="sort-by">
+                <option value="recent">Most Recent</option>
+                <option value="rating">Highest Rating</option>
+                <option value="swaps">Most Swaps</option>
+                <option value="items">Most Items</option>
+            </select>
+            <select id="filter-by">
+                <option value="all">All Members</option>
+                <option value="active">Active Swappers</option>
+                <option value="verified">Verified Members</option>
+                <option value="new">New Members</option>
+            </select>
+        </div>
+
+        <!-- Users Grid -->
+        <div class="users-grid">
+            <!-- User cards will be loaded dynamically -->
+        </div>
+
+        <!-- Load More -->
+        <div class="load-more">
+            <button id="load-more-btn" class="btn-load-more">
+                Load More
+                <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Navigation</h3>
+                <ul>
+                    <li><a href="/how-it-works">How it works</a></li>
+                    <li><a href="/vision">The Vision</a></li>
+                    <li><a href="/faqs">FAQ's</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Swopping</h3>
+                <ul>
+                    <li><a href="/shop">Shop</a></li>
+                    <li><a href="/wishlists">Wishlists</a></li>
+                    <li><a href="/start-swopping">Start Swopping</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Information</h3>
+                <ul>
+                    <li><a href="/support">Support</a></li>
+                    <li><a href="/returns">Returns</a></li>
+                    <li><a href="/delivery">Delivery</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="/privacy-policy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms & Conditions</a></li>
+                    <li><a href="/data-privacy">Data Privacy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 RRRewear. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/js/navigation.js"></script>
+    <script src="/js/users.js"></script>
+</body>
+</html> 

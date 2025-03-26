@@ -1,0 +1,47 @@
+extends layout
+
+block content
+  .closet-container
+    .sidebar
+      .nav-options
+        a.nav-item(href="/profile")
+          i.fas.fa-user
+          span My Profile
+        a.nav-item.active(href="/closet")
+          i.fas.fa-tshirt
+          span My Closet
+        a.nav-item(href="/wishlist")
+          i.fas.fa-heart
+          span Wish List
+        a.nav-item(href="/swap-requests")
+          i.fas.fa-exchange-alt
+          span Swap Requests
+        a.nav-item(href="/logout")
+          i.fas.fa-sign-out-alt
+          span Logout
+
+    .main-content
+      h1.closet-title My Closet
+      .products-section
+        .product-grid
+          //- Add Product Card (always shown at the front)
+          .product-card.add-product-card
+            a(href="/products/add")
+              .add-product-content
+                i.fas.fa-plus
+                span Add Product
+          
+          //- Existing Products
+          each product in products
+            .product-card
+              .product-image
+                img(src=product.image_url, alt=product.name)
+              .product-details
+                h3 #{product.name}
+                p.brand #{product.brand_name}
+                p.category #{product.category_name}
+                p.size Size: #{product.size}
+                p.condition Condition: #{product.condition}
+                p.material Material: #{product.material}
+                p.color Color: #{product.color}
+                p.description #{product.description} 

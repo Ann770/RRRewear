@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  .categories-container
+    .categories-header
+      .categories-title Categories
+      .category-nav
+        a.category-link.active(href="/categories/women") Women
+        a.category-link(href="/categories/men") Men
+
+    .products-section
+      .product-grid
+        each product in products
+          .product-card
+            .product-image
+              img(src=product.image, alt=product.name)
+            .product-details
+              h3 #{product.name}
+              p.brand #{product.brand}
+              p.size Size: #{product.size}
+              p.condition Condition: #{product.condition}
+              p.material Material: #{product.material}
+              p.color Color: #{product.color}
+              button.swap-request-button Request Swap 

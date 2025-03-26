@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .logo-text { font-family: Arial, sans-serif; font-weight: bold; }
+        .logo-circle { fill: #4CAF50; }
+        .logo-text { fill: #FFFFFF; }
+    </style>
+    <circle class="logo-circle" cx="25" cy="25" r="20"/>
+    <text class="logo-text" x="25" y="32" text-anchor="middle" font-size="24">R</text>
+    <text class="logo-text" x="70" y="32" font-size="24">RRRewear</text>
+</svg> 

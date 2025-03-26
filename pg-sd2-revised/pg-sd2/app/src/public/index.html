@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RRRewear - Sustainable Fashion Swapping</title>
+    <link rel="stylesheet" href="css/colors.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/alerts.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">RRRewear</a>
+            <div class="search-container">
+                <form class="search-form">
+                    <input type="text" class="search-input" placeholder="Search for items...">
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+            <nav>
+                <button class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="nav-menu">
+                    <a href="/listing" class="nav-link"><i class="fas fa-tags"></i> Listing</a>
+                    <a href="/community" class="nav-link"><i class="fas fa-users"></i> Community</a>
+                    <a href="/dashboard" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
+                    <a href="/contact" class="nav-link"><i class="fas fa-envelope"></i> Contact</a>
+                </div>
+                <div class="auth-section">
+                    <div class="auth-dropdown">
+                        <button class="auth-trigger">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Account</span>
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="auth-content">
+                            <div class="auth-header">
+                                <a href="/login" class="auth-btn primary">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Sign In
+                                </a>
+                                <div class="auth-divider">
+                                    <span><strong>New to RRRewear?</strong></span>
+                                </div>
+                                <a href="/register" class="auth-btn secondary">
+                                    <i class="fas fa-user-plus"></i>
+                                    Create Account
+                                </a>
+                            </div>
+                            <div class="auth-links">
+                                <div class="auth-column">
+                                    <h4>Profile Settings</h4>
+                                    <a href="/profile"><i class="fas fa-user"></i> My Profile</a>
+                                    <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
+                                    <a href="/preferences"><i class="fas fa-sliders-h"></i> Preferences</a>
+                                </div>
+                                <div class="auth-column">
+                                    <h4>My Activity</h4>
+                                    <a href="/my-listings"><i class="fas fa-list"></i> My Listings</a>
+                                    <a href="/swaps"><i class="fas fa-exchange-alt"></i> My Swaps</a>
+                                    <a href="/saved"><i class="fas fa-heart"></i> Saved Items</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">2</span>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Join the Circular Fashion Movement!</h1>
+            <p class="hero-description">Swap your clothes sustainably and join a community of eco-conscious fashion lovers.</p>
+            <a href="/register" class="hero-button">Swap Now</a>
+        </div>
+        <div class="hero-image-container">
+            <img src="images/swap-sketch.jpg" alt="Sustainable Fashion Swap Illustration" class="hero-image">
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-description">
+            RRRewear is your gateway to a sustainable, stylish, and community-driven fashion ecosystem. 
+            We make clothing swaps easy, eco-conscious, and enjoyable—because fashion can be both fabulous and ethical.
+        </p>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3 class="step-title">Choose What You Love</h3>
+                <p class="step-description">
+                    Browse a wide range of clothing items shared by other users. If you like something, 
+                    send a swap request to the owner. Once both users agree to the swap, the process begins!
+                </p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3 class="step-title">Send Your Clothes</h3>
+                <p class="step-description">
+                    Package your clothing and ship it to the RRRewear headquarters using our pre-paid label. 
+                    A small shipping fee of just £2.99 will apply.
+                </p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3 class="step-title">We Handle the Rest</h3>
+                <p class="step-description">
+                    Once your clothing arrives, we ensure it's sent to the respective user you swapped with—completely 
+                    free of charge! You'll soon receive the item you loved, making the whole process seamless and rewarding.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories">
+        <h2 class="section-title">Shop by Category</h2>
+        <div class="categories-grid">
+            <a href="/categories/women" class="category-card">
+                <img src="images/categories/women.jpg" alt="Women's Clothing">
+                <h3>Women</h3>
+                <p>Browse women's clothing</p>
+            </a>
+            <a href="/categories/men" class="category-card">
+                <img src="images/categories/men.jpg" alt="Men's Clothing">
+                <h3>Men</h3>
+                <p>Browse men's clothing</p>
+            </a>
+            <a href="/categories/accessories" class="category-card">
+                <img src="images/categories/accessories.jpg" alt="Accessories">
+                <h3>Accessories</h3>
+                <p>Jewelry, bags, and more</p>
+            </a>
+            <a href="/categories/shoes" class="category-card">
+                <img src="images/categories/shoes.jpg" alt="Shoes">
+                <h3>Shoes</h3>
+                <p>Footwear for all occasions</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Latest Listings Section -->
+    <section class="latest-listings">
+        <h2 class="section-title">Latest Listings</h2>
+        <div class="listings-grid" id="recent-listings">
+            <!-- Listings will be loaded dynamically -->
+        </div>
+    </section>
+
+    <!-- Impact Section -->
+    <section class="impact">
+        <h2 class="section-title">April's Sustainable Impact Targets</h2>
+        <div class="impact-grid">
+            <div class="impact-card">
+                <i class="fas fa-leaf impact-icon"></i>
+                <div class="impact-number">5%</div>
+                <div class="impact-label">Target Carbon Footprint<br>Reduction This Month</div>
+            </div>
+            <div class="impact-card">
+                <i class="fas fa-tshirt impact-icon"></i>
+                <div class="impact-number">20+</div>
+                <div class="impact-label">Target Active<br>Listings</div>
+            </div>
+            <div class="impact-card">
+                <i class="fas fa-recycle impact-icon"></i>
+                <div class="impact-number">10+</div>
+                <div class="impact-label">Target Successful<br>Swaps</div>
+            </div>
+            <div class="impact-card">
+                <i class="fas fa-handshake impact-icon"></i>
+                <div class="impact-number">5+</div>
+                <div class="impact-label">Target Local<br>Community Partners</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <div class="newsletter-container">
+            <div class="newsletter-content">
+                <h2>Stay Updated</h2>
+                <p>Let's Swoping! Subscribe to our newsletter for the latest updates and exclusive offers!</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Enter your email" required>
+                    <button type="submit">Subscribe</button>
+                </form>
+            </div>
+            <div class="newsletter-decoration"></div>
+            <div class="newsletter-decoration"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <ul>
+                    <li><a href="/about">Our Story</a></li>
+                    <li><a href="/mission">Mission</a></li>
+                    <li><a href="/team">Team</a></li>
+                    <li><a href="/careers">Careers</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Shop</h3>
+                <ul>
+                    <li><a href="/listings">All Listings</a></li>
+                    <li><a href="/categories">Categories</a></li>
+                    <li><a href="/new-arrivals">New Arrivals</a></li>
+                    <li><a href="/trending">Trending</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Community</h3>
+                <ul>
+                    <li><a href="/events">Events</a></li>
+                    <li><a href="/blog">Blog</a></li>
+                    <li><a href="/forum">Forum</a></li>
+                    <li><a href="/success-stories">Success Stories</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="/help">Help Center</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                    <li><a href="/faq">FAQ</a></li>
+                    <li><a href="/shipping">Shipping Info</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 RRRewear. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/home.js"></script>
+</body>
+</html> 

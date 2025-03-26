@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Circle -->
+    <circle cx="75" cy="75" r="75" fill="#e9ecef"/>
+    
+    <!-- Head -->
+    <circle cx="75" cy="60" r="25" fill="#adb5bd"/>
+    
+    <!-- Body -->
+    <path d="M75 90 C 45 90 30 120 30 150 L 120 150 C 120 120 105 90 75 90" fill="#adb5bd"/>
+    
+    <!-- Face -->
+    <!-- Eyes -->
+    <circle cx="65" cy="55" r="3" fill="#495057"/>
+    <circle cx="85" cy="55" r="3" fill="#495057"/>
+    
+    <!-- Smile -->
+    <path d="M65 65 Q 75 75 85 65" stroke="#495057" stroke-width="2" fill="none"/>
+</svg> 
