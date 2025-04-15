@@ -12,7 +12,7 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const fileUpload = require("express-fileupload");
 const mysql = require("mysql2");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const multer = require("multer");
 const jwt = require("jsonwebtoken");
@@ -50,11 +50,15 @@ const upload = multer({
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3003;
+
+// Set up view engine
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'app/src/views'));
 
 // Database configuration
 const db = mysql.createConnection({
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST || 'db',
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || 'password',
@@ -95,6 +99,9 @@ function createTables() {
       name VARCHAR(255) NOT NULL,
       email VARCHAR(255) NOT NULL UNIQUE,
       password VARCHAR(255) NOT NULL,
+      location VARCHAR(255),
+      size VARCHAR(10),
+      avatar_url VARCHAR(255),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `;
@@ -124,6 +131,31 @@ function createTables() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (category_id) REFERENCES categories(id)
+    )
+  `;
+
+  // Create wishlist table
+  const createWishlistTable = `
+    CREATE TABLE IF NOT EXISTS wishlist (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      listing_id INT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (listing_id) REFERENCES listings(id)
+    )
+  `;
+
+  // Create swap_requests table
+  const createSwapRequestsTable = `
+    CREATE TABLE IF NOT EXISTS swap_requests (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      requester_id INT NOT NULL,
+      listing_id INT NOT NULL,
+      status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (requester_id) REFERENCES users(id),
+      FOREIGN KEY (listing_id) REFERENCES listings(id)
     )
   `;
 
@@ -160,6 +192,22 @@ function createTables() {
       console.log('Listings table created or already exists');
     }
   });
+
+  db.query(createWishlistTable, (err) => {
+    if (err) {
+      console.error('Error creating wishlist table:', err);
+    } else {
+      console.log('Wishlist table created or already exists');
+    }
+  });
+
+  db.query(createSwapRequestsTable, (err) => {
+    if (err) {
+      console.error('Error creating swap_requests table:', err);
+    } else {
+      console.log('Swap requests table created or already exists');
+    }
+  });
 }
 
 // Add error handler for database connection
@@ -173,13 +221,16 @@ db.on('error', (err) => {
   }
 });
 
+// Initialize database connection
+connectWithRetry();
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'app/src/public')));
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
-        resave: false,
+  resave: false,
   saveUninitialized: false
 }));
 app.use(flash());
@@ -193,540 +244,295 @@ app.use((req, res, next) => {
   next();
 });
 
+// Authentication middleware
+const isAuthenticated = (req, res, next) => {
+  if (req.session.user) {
+    return next();
+  }
+  req.flash('error_msg', 'Please log in to access this page');
+  res.redirect('/login');
+};
+
 // Routes
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'app/src/public/index.html'));
-});
-
-// Category routes
-app.get('/categories', (req, res) => {
-  res.sendFile(path.join(__dirname, 'app/src/public/categories.html'));
-});
-
-app.get('/categories/women', (req, res) => {
-  res.sendFile(path.join(__dirname, 'app/src/public/categories-women.html'));
-});
-
-app.get('/categories/men', (req, res) => {
-  res.sendFile(path.join(__dirname, 'app/src/public/categories-men.html'));
-});
-
-// User routes
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'app/src/public/login.html'));
-});
-
-app.get('/register', (req, res) => {
-  res.sendFile(path.join(__dirname, 'app/src/public/register.html'));
-});
-
-app.get('/profile', (req, res) => {
-  res.sendFile(path.join(__dirname, 'app/src/public/profile.html'));
-});
-
-app.get('/closet', (req, res) => {
-  res.sendFile(path.join(__dirname, 'app/src/public/closet.html'));
-});
-
-// API routes for dynamic content
-app.get('/api/latest-items', (req, res) => {
   const query = `
-    SELECT l.*, u.username, c.name as category_name
+    SELECT l.*, u.name as seller_name, c.name as category_name
     FROM listings l
     JOIN users u ON l.user_id = u.id
     JOIN categories c ON l.category_id = c.id
     WHERE l.status = 'available'
     ORDER BY l.created_at DESC
-    LIMIT 6
+    LIMIT 12
   `;
   
-  db.query(query, (err, results) => {
+  db.query(query, (err, listings) => {
     if (err) {
-      console.error('Error fetching latest items:', err);
-      return res.status(500).json({ error: 'Failed to fetch latest items' });
+      console.error('Error fetching listings:', err);
+      return res.render('index', { title: 'RRRewear - Home', listings: [] });
     }
-    res.json(results);
+    res.render('index', { title: 'RRRewear - Home', listings });
+  });
+});
+
+// Auth routes
+app.get('/login', (req, res) => {
+  res.render('login', { title: 'Login' });
+});
+
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+    if (err) {
+      console.error('Error during login:', err);
+      req.flash('error_msg', 'An error occurred during login');
+      return res.redirect('/login');
+    }
+    
+    if (results.length === 0) {
+      req.flash('error_msg', 'Invalid email or password');
+      return res.redirect('/login');
+    }
+    
+    const user = results[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+    
+    if (!isMatch) {
+      req.flash('error_msg', 'Invalid email or password');
+      return res.redirect('/login');
+    }
+    
+    req.session.user = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      location: user.location,
+      size: user.size,
+      avatar_url: user.avatar_url
+    };
+    
+    req.flash('success_msg', 'You are now logged in');
+    res.redirect('/');
+  });
+});
+
+app.get('/register', (req, res) => {
+  res.render('register', { title: 'Register' });
+});
+
+app.post('/register', async (req, res) => {
+  const { name, email, password, location, size } = req.body;
+  
+  // Check if user already exists
+  db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+    if (err) {
+      console.error('Error checking user existence:', err);
+      req.flash('error_msg', 'An error occurred during registration');
+      return res.redirect('/register');
+    }
+    
+    if (results.length > 0) {
+      req.flash('error_msg', 'Email already registered');
+      return res.redirect('/register');
+    }
+    
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    
+    // Insert new user
+    const query = 'INSERT INTO users (name, email, password, location, size) VALUES (?, ?, ?, ?, ?)';
+    db.query(query, [name, email, hashedPassword, location, size], (err, result) => {
+      if (err) {
+        console.error('Error creating user:', err);
+        req.flash('error_msg', 'An error occurred during registration');
+        return res.redirect('/register');
+      }
+      
+      req.flash('success_msg', 'You are now registered and can log in');
+      res.redirect('/login');
     });
+  });
 });
 
-// Profile API Routes
-app.get('/api/profile', async (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: 'Unauthorized' });
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error during logout:', err);
     }
-
-    try {
-        const [user] = await db.query(
-            'SELECT id, username, email, bio, location, avatar_url, created_at FROM users WHERE id = ?',
-            [req.session.userId]
-        );
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Get user stats
-        const [listings] = await db.query(
-            'SELECT COUNT(*) as count FROM listings WHERE user_id = ?',
-            [req.session.userId]
-        );
-
-        const [purchases] = await db.query(
-            'SELECT COUNT(*) as count FROM transactions WHERE buyer_id = ?',
-            [req.session.userId]
-        );
-
-        const [sales] = await db.query(
-            'SELECT COUNT(*) as count FROM transactions WHERE seller_id = ?',
-            [req.session.userId]
-        );
-
-        res.json({
-            ...user,
-            listings_count: listings[0].count,
-            purchases_count: purchases[0].count,
-            sales_count: sales[0].count
-        });
-    } catch (error) {
-        console.error('Error fetching profile:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+    res.redirect('/');
+  });
 });
 
-app.put('/api/profile', async (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: 'Unauthorized' });
+// Protected routes
+app.get('/profile', isAuthenticated, (req, res) => {
+  const query = `
+    SELECT l.*, c.name as category_name
+    FROM listings l
+    JOIN categories c ON l.category_id = c.id
+    WHERE l.user_id = ?
+    ORDER BY l.created_at DESC
+  `;
+  
+  db.query(query, [req.session.user.id], (err, listings) => {
+    if (err) {
+      console.error('Error fetching user listings:', err);
+      return res.render('profile', { title: 'My Profile', user: req.session.user, listings: [] });
     }
-
-    try {
-        const { username, email, bio, location, current_password, new_password } = req.body;
-
-        // Validate current password if trying to change password
-        if (new_password) {
-            const [user] = await db.query(
-                'SELECT password FROM users WHERE id = ?',
-                [req.session.userId]
-            );
-
-            if (!user || !bcrypt.compareSync(current_password, user.password)) {
-                return res.status(400).json({ error: 'Current password is incorrect' });
-            }
-        }
-
-        // Update user profile
-        const updateFields = [];
-        const updateValues = [];
-
-        if (username) {
-            updateFields.push('username = ?');
-            updateValues.push(username);
-        }
-
-        if (email) {
-            updateFields.push('email = ?');
-            updateValues.push(email);
-        }
-
-        if (bio !== undefined) {
-            updateFields.push('bio = ?');
-            updateValues.push(bio);
-        }
-
-        if (location !== undefined) {
-            updateFields.push('location = ?');
-            updateValues.push(location);
-        }
-
-        if (new_password) {
-            updateFields.push('password = ?');
-            updateValues.push(bcrypt.hashSync(new_password, 10));
-        }
-
-        if (updateFields.length === 0) {
-            return res.status(400).json({ error: 'No fields to update' });
-        }
-
-        updateValues.push(req.session.userId);
-
-        await db.query(
-            `UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`,
-            updateValues
-        );
-
-        res.json({ message: 'Profile updated successfully' });
-    } catch (error) {
-        console.error('Error updating profile:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+    res.render('profile', { title: 'My Profile', user: req.session.user, listings });
+  });
 });
 
-app.post('/api/profile/avatar', upload.single('avatar'), async (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: 'Unauthorized' });
+app.get('/closet', isAuthenticated, (req, res) => {
+  const query = `
+    SELECT l.*, c.name as category_name
+    FROM listings l
+    JOIN categories c ON l.category_id = c.id
+    WHERE l.user_id = ?
+    ORDER BY l.created_at DESC
+  `;
+  
+  db.query(query, [req.session.user.id], (err, listings) => {
+    if (err) {
+      console.error('Error fetching closet items:', err);
+      return res.render('closet', { title: 'My Closet', listings: [] });
     }
-
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-
-        // Generate unique filename
-        const filename = `${req.session.userId}-${Date.now()}-${req.file.originalname}`;
-        const filepath = path.join(__dirname, 'app/src/public/images/avatars', filename);
-
-        // Ensure avatars directory exists
-        await fs.promises.mkdir(path.dirname(filepath), { recursive: true });
-
-        // Move uploaded file
-        await fs.promises.rename(req.file.path, filepath);
-
-        // Update user's avatar_url in database
-        const avatarUrl = `/images/avatars/${filename}`;
-        await db.query(
-            'UPDATE users SET avatar_url = ? WHERE id = ?',
-            [avatarUrl, req.session.userId]
-        );
-
-        res.json({ avatar_url: avatarUrl });
-    } catch (error) {
-        console.error('Error uploading avatar:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+    res.render('closet', { title: 'My Closet', listings });
+  });
 });
 
-// Registration endpoint
-app.post('/api/register', async (req, res) => {
-    try {
-        console.log('Registration request received:', req.body);
-        const { name, email, password } = req.body;
-
-        // Validate input
-        if (!name || !email || !password) {
-            console.log('Missing required fields:', { name, email, password: password ? 'provided' : 'missing' });
-            return res.status(400).json({ 
-                success: false,
-                message: 'Please provide all required fields' 
-            });
-        }
-
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            console.log('Invalid email format:', email);
-            return res.status(400).json({ 
-                success: false,
-                message: 'Please provide a valid email address' 
-            });
-        }
-
-        // Check if user already exists
-        db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
-            if (err) {
-                console.error('Database error checking user:', err);
-                console.error('SQL Query:', 'SELECT * FROM users WHERE email = ?');
-                console.error('Parameters:', [email]);
-                return res.status(500).json({ 
-                    success: false,
-                    message: 'Error checking user existence',
-                    error: err.message
-                });
-            }
-
-            if (results.length > 0) {
-                console.log('User already exists:', email);
-                return res.status(400).json({ 
-                    success: false,
-                    message: 'User already exists' 
-                });
-            }
-
-            // Hash password
-            const hashedPassword = await bcrypt.hash(password, 10);
-            console.log('Password hashed successfully');
-
-            // Insert new user
-            const query = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
-            db.query(query, [name, email, hashedPassword], (err, result) => {
-                if (err) {
-                    console.error('Error creating user:', err);
-                    console.error('SQL Query:', query);
-                    console.error('Parameters:', [name, email, 'hashed_password']);
-                    return res.status(500).json({ 
-                        success: false,
-                        message: 'Error creating user',
-                        error: err.message
-                    });
-                }
-
-                console.log('User created successfully:', result.insertId);
-
-                // Create token
-                const token = jwt.sign(
-                    { userId: result.insertId },
-                    process.env.JWT_SECRET || 'your-secret-key',
-                    { expiresIn: '24h' }
-                );
-
-                res.status(201).json({
-                    success: true,
-                    message: 'User registered successfully',
-                    token,
-                    user: {
-                        id: result.insertId,
-                        name,
-                        email
-                    }
-                });
-            });
-        });
-    } catch (error) {
-        console.error('Registration error:', error);
-        console.error('Stack trace:', error.stack);
-        res.status(500).json({ 
-            success: false,
-            message: 'Error registering user',
-            error: error.message
-        });
+app.get('/wishlist', isAuthenticated, (req, res) => {
+  const query = `
+    SELECT l.*, c.name as category_name, u.name as seller_name
+    FROM wishlist w
+    JOIN listings l ON w.listing_id = l.id
+    JOIN categories c ON l.category_id = c.id
+    JOIN users u ON l.user_id = u.id
+    WHERE w.user_id = ?
+    ORDER BY w.created_at DESC
+  `;
+  
+  db.query(query, [req.session.user.id], (err, listings) => {
+    if (err) {
+      console.error('Error fetching wishlist:', err);
+      return res.render('wishlist', { title: 'My Wishlist', listings: [] });
     }
+    res.render('wishlist', { title: 'My Wishlist', listings });
+  });
 });
 
-// Login endpoint
-app.post('/api/login', async (req, res) => {
-    try {
-        console.log('Login request received:', req.body);
-        const { email, password } = req.body;
-
-        // Validate input
-        if (!email || !password) {
-            console.log('Missing required fields:', { email, password: password ? 'provided' : 'missing' });
-            return res.status(400).json({ 
-                success: false,
-                message: 'Please provide email and password' 
-            });
-        }
-
-        // Find user
-        db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
-            if (err) {
-                console.error('Database error during login:', err);
-                return res.status(500).json({ 
-                    success: false,
-                    message: 'Error during login',
-                    error: err.message
-                });
-            }
-
-            if (results.length === 0) {
-                console.log('User not found:', email);
-                return res.status(401).json({ 
-                    success: false,
-                    message: 'Invalid email or password' 
-                });
-            }
-
-            const user = results[0];
-            console.log('Found user:', JSON.stringify(user, null, 2));
-
-            // Verify password
-            const isValidPassword = await bcrypt.compare(password, user.password);
-            if (!isValidPassword) {
-                console.log('Invalid password for user:', email);
-                return res.status(401).json({ 
-                    success: false,
-                    message: 'Invalid email or password' 
-                });
-            }
-
-            // Create token
-            const token = jwt.sign(
-                { userId: user.id },
-                process.env.JWT_SECRET || 'your-secret-key',
-                { expiresIn: '24h' }
-            );
-
-            // Log successful login
-            console.log('User logged in successfully:', user.id);
-
-            // Set user session
-            req.session.user = {
-                id: user.id,
-                name: user.name,
-                email: user.email
-            };
-
-            // Send response
-            res.json({
-                success: true,
-                message: 'Login successful',
-                token,
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    avatar_url: user.avatar_url,
-                    points: user.points,
-                    level: user.level
-                }
-            });
-
-            // Try to update last_login after sending response
-            if (user.id) {
-                db.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id], (updateErr) => {
-                    if (updateErr) {
-                        console.error('Error updating last login:', updateErr);
-                        // Ignore the error since we've already sent the response
-                    }
-                });
-            } else {
-                console.error('User ID is missing. Full user object:', JSON.stringify(user, null, 2));
-            }
-        });
-    } catch (error) {
-        console.error('Login error:', error);
-        console.error('Stack trace:', error.stack);
-        res.status(500).json({ 
-            success: false,
-            message: 'Error during login',
-            error: error.message
-        });
+app.get('/swap-requests', isAuthenticated, (req, res) => {
+  const query = `
+    SELECT sr.*, l.title as listing_title, u.name as requester_name
+    FROM swap_requests sr
+    JOIN listings l ON sr.listing_id = l.id
+    JOIN users u ON sr.requester_id = u.id
+    WHERE l.user_id = ?
+    ORDER BY sr.created_at DESC
+  `;
+  
+  db.query(query, [req.session.user.id], (err, requests) => {
+    if (err) {
+      console.error('Error fetching swap requests:', err);
+      return res.render('swap-requests', { title: 'Swap Requests', requests: [] });
     }
+    res.render('swap-requests', { title: 'Swap Requests', requests });
+  });
 });
 
-// Users List API
-app.get('/api/users', async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 12;
-        const offset = (page - 1) * perPage;
-        const search = req.query.search || '';
-        const sort = req.query.sort || 'newest';
-        const location = req.query.location || '';
-
-        let query = `
-            SELECT 
-                u.id,
-                u.name,
-                u.email,
-                u.avatar_url,
-                u.location,
-                u.bio,
-                u.points,
-                u.level,
-                u.created_at,
-                COALESCE(AVG(r.rating), 0) as rating,
-                COUNT(DISTINCT l.id) as listings_count,
-                COUNT(DISTINCT r.id) as reviews_count
-            FROM users u
-            LEFT JOIN listings l ON u.id = l.user_id
-            LEFT JOIN reviews r ON u.id = r.reviewed_user_id
-            WHERE 1=1
-        `;
-
-        const params = [];
-
-        if (search) {
-            query += ` AND (u.name ILIKE $${params.length + 1} OR u.bio ILIKE $${params.length + 1})`;
-            params.push(`%${search}%`);
-        }
-
-        if (location) {
-            query += ` AND u.location = $${params.length + 1}`;
-            params.push(location);
-        }
-
-        query += ` GROUP BY u.id`;
-
-        // Add sorting
-        switch (sort) {
-            case 'active':
-                query += ` ORDER BY listings_count DESC, rating DESC`;
-                break;
-            case 'rating':
-                query += ` ORDER BY rating DESC, listings_count DESC`;
-                break;
-            default: // newest
-                query += ` ORDER BY u.created_at DESC`;
-        }
-
-        // Add pagination
-        query += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-        params.push(perPage, offset);
-
-        // Get total count
-        const countQuery = `
-            SELECT COUNT(DISTINCT u.id)
-            FROM users u
-            WHERE 1=1
-            ${search ? `AND (u.name ILIKE $1 OR u.bio ILIKE $1)` : ''}
-            ${location ? `AND u.location = $${search ? 2 : 1}` : ''}
-        `;
-        const countParams = [];
-        if (search) countParams.push(`%${search}%`);
-        if (location) countParams.push(location);
-
-        const [users, totalCount] = await Promise.all([
-            db.query(query, params),
-            db.query(countQuery, countParams)
-        ]);
-
-        // Get unique locations for filter
-        const locationsQuery = `
-            SELECT DISTINCT location
-            FROM users
-            WHERE location IS NOT NULL AND location != ''
-            ORDER BY location
-        `;
-        const locations = await db.query(locationsQuery);
-
-        // Get user badges
-        const badgesQuery = `
-            SELECT ub.user_id, b.name, b.icon
-            FROM user_badges ub
-            JOIN badges b ON ub.badge_id = b.id
-            WHERE ub.user_id = ANY($1)
-        `;
-        const userIds = users.rows.map(user => user.id);
-        const badges = await db.query(badgesQuery, [userIds]);
-
-        // Attach badges to users
-        const usersWithBadges = users.rows.map(user => ({
-            ...user,
-            badges: badges.rows.filter(badge => badge.user_id === user.id)
-        }));
-
-        res.json({
-            success: true,
-            users: usersWithBadges,
-            total: parseInt(totalCount.rows[0].count),
-            page,
-            per_page: perPage,
-            locations: locations.rows.map(row => row.location)
-        });
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching users'
-        });
+// Category routes
+app.get('/categories', (req, res) => {
+  const query = `
+    SELECT c.*, COUNT(l.id) as listing_count
+    FROM categories c
+    LEFT JOIN listings l ON c.id = l.category_id
+    GROUP BY c.id
+  `;
+  
+  db.query(query, (err, categories) => {
+    if (err) {
+      console.error('Error fetching categories:', err);
+      req.flash('error_msg', 'Error fetching categories');
+      return res.redirect('/');
     }
+    res.render('categories/list', { 
+      title: 'Categories',
+      categories: categories || []
+    });
+  });
+});
+
+app.get('/categories/women', (req, res) => {
+  const query = `
+    SELECT l.*, u.name as seller_name, c.name as category_name
+    FROM listings l
+    JOIN users u ON l.user_id = u.id
+    JOIN categories c ON l.category_id = c.id
+    WHERE c.name = 'Women' AND l.status = 'available'
+    ORDER BY l.created_at DESC
+  `;
+  
+  db.query(query, (err, products) => {
+    if (err) {
+      console.error('Error fetching women\'s products:', err);
+      return res.render('categories/categories-women', { 
+        title: 'Women\'s Clothing',
+        products: [],
+        error: 'Error fetching products'
+      });
+    }
+    res.render('categories/categories-women', { 
+      title: 'Women\'s Clothing',
+      products
+    });
+  });
+});
+
+app.get('/categories/men', (req, res) => {
+  const query = `
+    SELECT l.*, u.name as seller_name, c.name as category_name
+    FROM listings l
+    JOIN users u ON l.user_id = u.id
+    JOIN categories c ON l.category_id = c.id
+    WHERE c.name = 'Men' AND l.status = 'available'
+    ORDER BY l.created_at DESC
+  `;
+  
+  db.query(query, (err, products) => {
+    if (err) {
+      console.error('Error fetching men\'s products:', err);
+      return res.render('categories/categories-men', { 
+        title: 'Men\'s Clothing',
+        products: [],
+        error: 'Error fetching products'
+      });
+    }
+    res.render('categories/categories-men', { 
+      title: 'Men\'s Clothing',
+      products
+    });
+  });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).render("error", {
-        title: "Error - RRRewear",
-        message: "Something went wrong!",
-        user: req.session.user,
-    });
+  console.error(err.stack);
+  res.status(500).render('error', { 
+    title: 'Error',
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
 });
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'app/src/public/404.html'));
+  res.status(404).render('error', { 
+    title: '404 Not Found',
+    message: 'The page you are looking for does not exist.',
+    error: {}
+  });
 });
 
-// Start the server
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

@@ -1,0 +1,23 @@
+extends layout
+
+block content
+  .error-page
+    .error-container
+      .error-content
+        .error-icon
+          i.fas.fa-exclamation-circle
+        h1.error-title Oops! Something went wrong
+        if message
+          p.error-message= message
+        else
+          p.error-message We're sorry, but there was an error processing your request.
+        .error-actions
+          a.btn.btn-primary(href='/')
+            i.fas.fa-home
+            span Return to Home
+          a.btn.btn-secondary(href='javascript:history.back()')
+            i.fas.fa-arrow-left
+            span Go Back
+        .error-details
+          if error && error.stack && process.env.NODE_ENV === 'development'
+            pre.error-stack= error.stack 

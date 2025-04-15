@@ -2,75 +2,127 @@ doctype html
 html(lang="en")
   head
     meta(charset="UTF-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
     meta(name="description", content="RRRewear - A sustainable fashion platform for swapping pre-owned clothing")
     meta(name="keywords", content="sustainable fashion, clothing swap, circular fashion, eco-friendly")
-    title RRRewear - Circular Fashion Movement
-    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
-    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap", rel="stylesheet")
-    link(rel="stylesheet", href="/css/style.css")
+    title #{title} - RRRewear
+    link(rel="stylesheet" href="/css/style.css")
+    link(rel="stylesheet" href="/css/header.css")
+    link(rel="stylesheet" href="/css/footer.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css")
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet")
     link(rel="icon", type="image/png", href="https://via.placeholder.com/32x32")
   body
     .top-bar
       a.logo(href="/") RRRewear
+      
       .category-nav
         a(href="/categories/women") Women
         a(href="/categories/men") Men
+        a(href="/categories/accessories") Accessories
+        a(href="/categories/shoes") Shoes
+      
       .search-bar
-        input(type="text", placeholder="Search...")
+        input(type="text" placeholder="Search for clothes...")
         i.fas.fa-search
+      
       .nav-icons
-        .notification-icon
-          i.fas.fa-bell
-          .notification-dropdown
-            .notification-item
-              p New swap request
-              span.time 2 hours ago
-            .notification-item
-              p Your listing was viewed
-              span.time 5 hours ago
-        .menu-icon
-          i.fas.fa-bars
-          .menu-dropdown
-            a(href="/profile") My Profile
-            a(href="/closet") My Closet
-            a(href="/wishlist") Wish List
-            a(href="/swap-requests") Swap Requests
-            a(href="/logout") Logout
-
-    .container
+        if user
+          .notification-icon
+            i.fas.fa-bell
+            .notification-dropdown
+              .notification-item
+                p New swap request
+                span.time 2 minutes ago
+              .notification-item
+                p Your listing was liked
+                span.time 1 hour ago
+              .notification-item
+                p Swap request accepted
+                span.time 2 hours ago
+          
+          .menu-icon
+            i.fas.fa-user
+            .menu-dropdown
+              a(href="/profile")
+                i.fas.fa-user-circle
+                span Profile
+              a(href="/closet")
+                i.fas.fa-tshirt
+                span My Closet
+              a(href="/wishlist")
+                i.fas.fa-heart
+                span Wishlist
+              a(href="/swap-requests")
+                i.fas.fa-exchange-alt
+                span Swap Requests
+              a(href="/logout")
+                i.fas.fa-sign-out-alt
+                span Logout
+        else
+          a.nav-link(href="/login") Login
+          a.nav-link(href="/register") Register
+    
+    main
       block content
-
-    footer.footer
+    
+    footer
       .footer-content
         .footer-section
           h3 About RRRewear
-          p Join our community of sustainable fashion enthusiasts. Swap clothes, reduce waste, and make a difference.
+          p Join the circular fashion movement. Swap, share, and style sustainably.
         
         .footer-section
           h3 Quick Links
-          ul.footer-links
+          ul
             li
-              a(href="/browse") Browse Listings
+              a(href="/categories/women") Women
+            li
+              a(href="/categories/men") Men
+            li
+              a(href="/categories/accessories") Accessories
+            li
+              a(href="/categories/shoes") Shoes
         
-      .footer-bottom
-        p © 2025 RRRewear. All rights reserved.
-
+        .footer-section
+          h3 Support
+          ul
+            li
+              a(href="/help") Help Center
+            li
+              a(href="/contact") Contact Us
+            li
+              a(href="/faq") FAQ
+        
+        .footer-section
+          h3 Connect With Us
+          .social-links
+            a(href="#")
+              i.fab.fa-facebook
+            a(href="#")
+              i.fab.fa-instagram
+            a(href="#")
+              i.fab.fa-twitter
+            a(href="#")
+              i.fab.fa-pinterest
+    
     script(src="/js/main.js")
     script.
-      // Toggle dropdowns
+      // Dropdown toggles
       document.querySelectorAll('.notification-icon, .menu-icon').forEach(icon => {
-        icon.addEventListener('click', function() {
-          const dropdown = this.querySelector('.notification-dropdown, .menu-dropdown');
+        icon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const dropdown = icon.querySelector('.notification-dropdown, .menu-dropdown');
+          document.querySelectorAll('.notification-dropdown.show, .menu-dropdown.show').forEach(d => {
+            if (d !== dropdown) d.classList.remove('show');
+          });
           dropdown.classList.toggle('show');
         });
       });
 
       // Close dropdowns when clicking outside
-      document.addEventListener('click', function(event) {
-        if (!event.target.closest('.nav-icons')) {
-          document.querySelectorAll('.notification-dropdown, .menu-dropdown').forEach(dropdown => {
-            dropdown.classList.remove('show');
-          });
-        }
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.notification-dropdown.show, .menu-dropdown.show').forEach(dropdown => {
+          dropdown.classList.remove('show');
+        });
       }); 

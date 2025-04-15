@@ -9,16 +9,46 @@ block content
         a.category-link.active(href="/categories/men") Men
 
     .products-section
-      .product-grid
-        each product in products
-          .product-card
-            .product-image
-              img(src=product.image, alt=product.name)
-            .product-details
-              h3 #{product.name}
-              p.brand #{product.brand}
-              p.size Size: #{product.size}
-              p.condition Condition: #{product.condition}
-              p.material Material: #{product.material}
-              p.color Color: #{product.color}
-              button.swap-request-button Request Swap 
+      if error
+        .error-message
+          p= error
+          a.btn.btn-primary(href="/") Return to Home
+
+      else
+        .filters
+          h3 Filters
+          .filter-group
+            h4 Size
+            .size-filters
+              each size in ['XS', 'S', 'M', 'L', 'XL']
+                label
+                  input(type="checkbox" value=size)
+                  span= size
+          .filter-group
+            h4 Condition
+            .condition-filters
+              each condition in ['Like New', 'Very Good', 'Good']
+                label
+                  input(type="checkbox" value=condition)
+                  span= condition
+
+        .product-grid
+          if products && products.length > 0
+            each product in products
+              .product-card
+                .product-image
+                  img(src=product.image_url || '/images/placeholder.jpg' alt=product.title)
+                .product-details
+                  h3= product.title
+                  p.brand= product.brand || 'Brand not specified'
+                  p.size Size: #{product.size || 'Not specified'}
+                  p.condition Condition: #{product.condition_status}
+                  p.seller Seller: #{product.username}
+                  button.swap-request-button(onclick=`viewProduct(${product.id})`) View Details
+          else
+            .no-products
+              p No products found in this category.
+              a.btn.btn-primary(href="/") Browse All Items
+
+block scripts
+  script(src='/js/products.js') 

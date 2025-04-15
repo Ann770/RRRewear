@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const productGrid = document.getElementById('productGrid');
+    const productGrid = document.querySelector('.product-grid');
     const filterInputs = document.querySelectorAll('.filter-group input');
     const searchInput = document.querySelector('.search-input');
     const currentCategory = window.location.pathname.includes('women') ? 'Women' : 'Men';
@@ -58,30 +58,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to view product details
-    function viewProduct(productId) {
-        window.location.href = `/product/${productId}`;
-    }
-
-    // Function to handle filter changes
-    function handleFilterChange() {
-        const filters = {
-            condition: Array.from(document.querySelectorAll('input[name="condition"]:checked')).map(cb => cb.value),
-            size: Array.from(document.querySelectorAll('input[name="size"]:checked')).map(cb => cb.value),
-            brand: Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(cb => cb.value)
-        };
-
-        const searchParams = new URLSearchParams();
-        Object.entries(filters).forEach(([key, values]) => {
-            if (values.length > 0) {
-                searchParams.append(key, values.join(','));
-            }
+    // Function to filter products
+    function filterProducts() {
+        const selectedSizes = Array.from(document.querySelectorAll('.size-filters input:checked')).map(input => input.value);
+        const selectedConditions = Array.from(document.querySelectorAll('.condition-filters input:checked')).map(input => input.value);
+        
+        const productCards = productGrid.querySelectorAll('.product-card');
+        
+        productCards.forEach(card => {
+            const size = card.querySelector('.size').textContent.split(': ')[1];
+            const condition = card.querySelector('.condition').textContent.split(': ')[1];
+            
+            const sizeMatch = selectedSizes.length === 0 || selectedSizes.includes(size);
+            const conditionMatch = selectedConditions.length === 0 || selectedConditions.includes(condition);
+            
+            card.style.display = sizeMatch && conditionMatch ? 'block' : 'none';
         });
 
-        const currentUrl = new URL(window.location.href);
-        currentUrl.search = searchParams.toString();
-        window.location.href = currentUrl.toString();
+        // Show/hide no products message
+        const visibleProducts = productGrid.querySelectorAll('.product-card[style="display: block"]');
+        const noProductsMessage = productGrid.querySelector('.no-products');
+        if (noProductsMessage) {
+            noProductsMessage.style.display = visibleProducts.length === 0 ? 'block' : 'none';
+        }
     }
+
+    // Function to view product details
+    window.viewProduct = function(productId) {
+        window.location.href = `/listings/${productId}`;
+    };
 
     // Initialize when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
@@ -102,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add filter change handlers
         const filterInputs = document.querySelectorAll('.filter-option input');
         filterInputs.forEach(input => {
-            input.addEventListener('change', handleFilterChange);
+            input.addEventListener('change', filterProducts);
         });
 
         // Add search input handler for real-time search
