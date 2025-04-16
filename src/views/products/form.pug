@@ -1,0 +1,155 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    .row.justify-content-center
+      .col-md-8
+        .card
+          .card-header
+            h3.mb-0= item ? 'Edit Item' : 'Add New Item'
+          .card-body
+            form#itemForm(action=item ? `/products/${item.item_id}` : '/products' method='POST')
+              if item
+                input(type='hidden' name='_method' value='PUT')
+              
+              .mb-3
+                label.form-label(for='name') Item Name
+                input#name.form-control(
+                  type='text'
+                  name='name'
+                  value=item ? item.name : ''
+                  required
+                )
+              
+              .mb-3
+                label.form-label(for='description') Description
+                textarea#description.form-control(
+                  name='description'
+                  rows='3'
+                  required
+                )= item ? item.description : ''
+              
+              .row.mb-3
+                .col-md-6
+                  label.form-label(for='brand') Brand
+                  select#brand.form-select(name='brand_id' required)
+                    option(value='') Select Brand
+                    each brand in brands
+                      option(
+                        value=brand.brand_id
+                        selected=item && item.brand_id == brand.brand_id
+                      )= brand.name
+                
+                .col-md-6
+                  label.form-label(for='category') Category
+                  select#category.form-select(name='category_id' required)
+                    option(value='') Select Category
+                    each category in categories
+                      option(
+                        value=category.category_id
+                        selected=item && item.category_id == category.category_id
+                      )= category.name
+              
+              .row.mb-3
+                .col-md-4
+                  label.form-label(for='condition') Condition
+                  select#condition.form-select(name='item_condition' required)
+                    option(value='') Select Condition
+                    each condition in ['New', 'Like New', 'Good', 'Fair', 'Poor']
+                      option(
+                        value=condition
+                        selected=item && item.item_condition == condition
+                      )= condition
+                
+                .col-md-4
+                  label.form-label(for='size') Size
+                  select#size.form-select(name='size' required)
+                    option(value='') Select Size
+                    each size in ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+                      option(
+                        value=size
+                        selected=item && item.size == size
+                      )= size
+                
+                .col-md-4
+                  label.form-label(for='color') Color
+                  input#color.form-control(
+                    type='text'
+                    name='color'
+                    value=item ? item.color : ''
+                    required
+                  )
+              
+              .mb-3
+                label.form-label(for='image') Image URL
+                input#image.form-control(
+                  type='url'
+                  name='image_url'
+                  value=item ? item.image_url : ''
+                  required
+                )
+              
+              .mb-3
+                label.form-label(for='swap_preferences') Swap Preferences
+                textarea#swap_preferences.form-control(
+                  name='swap_preferences'
+                  rows='2'
+                  placeholder='What kind of items are you looking to swap for?'
+                )= item ? item.swap_preferences : ''
+              
+              .row.mb-3
+                .col-md-6
+                  label.form-label(for='preferred_categories') Preferred Categories
+                  input#preferred_categories.form-control(
+                    type='text'
+                    name='preferred_categories'
+                    value=item ? item.preferred_categories : ''
+                    placeholder='e.g., Tops, Dresses, Shoes'
+                  )
+                
+                .col-md-6
+                  label.form-label(for='preferred_sizes') Preferred Sizes
+                  input#preferred_sizes.form-control(
+                    type='text'
+                    name='preferred_sizes'
+                    value=item ? item.preferred_sizes : ''
+                    placeholder='e.g., M, L, XL'
+                  )
+              
+              .d-grid.gap-2
+                button.btn.btn-primary(type='submit')= item ? 'Update Item' : 'Add Item'
+                a.btn.btn-outline-secondary(href='/products') Cancel
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('itemForm');
+      
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+          const response = await fetch(this.action, {
+            method: this.querySelector('input[name="_method"]')?.value || 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            window.location.href = '/products';
+          } else {
+            alert(result.message || 'Error saving item');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error saving item');
+        }
+      });
+    }); 

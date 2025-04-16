@@ -1,0 +1,73 @@
+extends layout
+
+block content
+  .container.mt-4
+    h1.mb-4 My Wishlist
+    
+    if items && items.length > 0
+      .row
+        each item in items
+          .col-md-4.mb-4
+            .card.h-100
+              if item.image_url
+                img.card-img-top(src=item.image_url alt=item.name style="height: 200px; object-fit: cover;")
+              else
+                .card-img-top.bg-light.d-flex.align-items-center.justify-content-center(style="height: 200px;")
+                  i.fas.fa-tshirt.fa-3x.text-muted
+              .card-body
+                h5.card-title= item.name
+                p.card-text= item.description
+                .d-flex.justify-content-between.align-items-center
+                  span.badge.bg-primary= item.brand_name
+                  span.badge.bg-secondary= item.category_name
+                .mt-2
+                  small.text-muted Owner: #{item.owner_name}
+                  if item.condition
+                    small.text-muted.ms-2 | Condition: #{item.condition}
+                  if item.size
+                    small.text-muted.ms-2 | Size: #{item.size}
+                  if item.color
+                    small.text-muted.ms-2 | Color: #{item.color}
+                .mt-3
+                  button.btn.btn-danger.btn-sm.remove-from-wishlist(data-item-id=item.item_id)
+                    i.fas.fa-heart-broken.me-1
+                    | Remove
+    else
+      .alert.alert-info
+        p You don't have any items in your wishlist yet.
+        a.btn.btn-primary.mt-2(href="/products") Browse Products
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle remove from wishlist
+      const removeButtons = document.querySelectorAll('.remove-from-wishlist');
+      removeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const itemId = this.getAttribute('data-item-id');
+          if (confirm('Are you sure you want to remove this item from your wishlist?')) {
+            fetch(`/wishlist/remove/${itemId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Remove the card from the UI
+                this.closest('.col-md-4').remove();
+                // Show success message
+                alert('Item removed from wishlist');
+              } else {
+                alert(data.message || 'Error removing item from wishlist');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('Error removing item from wishlist');
+            });
+          }
+        });
+      });
+    }); 

@@ -1,0 +1,14 @@
+/* Import all component styles */
+@import 'base.css';
+@import 'header.css';
+@import 'navigation.css';
+@import 'footer.css';
+@import 'profile.css';
+@import 'closet.css';
+@import 'categories.css';
+@import 'cards.css';
+@import 'forms.css';
+@import 'buttons.css';
+@import 'alerts.css';
+@import 'responsive.css'; 
+@import 'home.css';

@@ -1,0 +1,35 @@
+/* Categories Page Styles */
+.categories-container {
+  width: 1440px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.categories-header {
+  background-color: var(--grey-color);
+  width: 234px;
+  height: 132px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.categories-title {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.category-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.category-link {
+  text-decoration: none;
+  color: var(--black);
+  font-size: 18px;
+}
+
+.category-link.active {
+  text-decoration: underline;
+} 

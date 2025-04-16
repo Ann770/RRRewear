@@ -1,0 +1,83 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+    <h1 class="mb-4">My Wishlist</h1>
+    
+    <% if (items && items.length > 0) { %>
+        <div class="row">
+            <% items.forEach(function(item) { %>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="<%= item.image_url %>" class="card-img-top" alt="<%= item.name %>">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= item.name %></h5>
+                            <p class="card-text">
+                                <strong>Brand:</strong> <%= item.brand_name %><br>
+                                <strong>Category:</strong> <%= item.category_name %><br>
+                                <strong>Size:</strong> <%= item.size %><br>
+                                <strong>Condition:</strong> <%= item.condition %><br>
+                                <strong>Owner:</strong> <%= item.owner_name %>
+                            </p>
+                            <p class="card-text"><small class="text-muted"><%= item.description %></small></p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button class="btn btn-primary btn-sm request-swap" data-item-id="<%= item.item_id %>">
+                                    Request Swap
+                                </button>
+                                <button class="btn btn-danger btn-sm remove-from-wishlist" data-item-id="<%= item.item_id %>">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="alert alert-info">
+            Your wishlist is empty. Browse the available items and add them to your wishlist!
+        </div>
+    <% } %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle remove from wishlist
+    document.querySelectorAll('.remove-from-wishlist').forEach(button => {
+        button.addEventListener('click', async function() {
+            const itemId = this.dataset.itemId;
+            try {
+                const response = await fetch(`/wishlist/remove/${itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    // Remove the card from the UI
+                    this.closest('.col-md-4').remove();
+                    // Show success message
+                    alert('Item removed from wishlist');
+                } else {
+                    alert(data.message || 'Error removing item from wishlist');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error removing item from wishlist');
+            }
+        });
+    });
+
+    // Handle request swap
+    document.querySelectorAll('.request-swap').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            window.location.href = `/swap/request/${itemId}`;
+        });
+    });
+});
+</script>
+
+<%- include('partials/footer') %> 

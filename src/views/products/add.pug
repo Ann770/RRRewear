@@ -1,0 +1,137 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    .row.justify-content-center
+      .col-md-8
+        .card
+          .card-header
+            h3.mb-0 Add New Item
+          .card-body
+            form(action="/products/add" method="POST" enctype="multipart/form-data")
+              .mb-4
+                label.form-label(for="image") Item Image
+                .upload-box.mb-3
+                  input#image.form-control.d-none(type="file" name="image" accept="image/*" required)
+                  .upload-placeholder.text-center.p-4.border.rounded
+                    i.fas.fa-cloud-upload-alt.fa-3x.mb-3
+                    p.mb-0 Click to upload or drag and drop
+                    p.small.text-muted.mb-0 (JPG, PNG, GIF up to 5MB)
+                #imagePreview.d-none
+                  img.img-fluid.rounded.mt-2(src="" alt="Preview" style="max-height: 200px;")
+              
+              .mb-3
+                label.form-label(for="name") Item Name
+                input#name.form-control(type="text" name="name" required placeholder="e.g., Zara High-Waisted Jeans")
+              
+              .mb-3
+                label.form-label(for="description") Description
+                textarea#description.form-control(name="description" rows="3" required placeholder="Describe your item's condition, style, and any notable features")
+              
+              .row
+                .col-md-6
+                  .mb-3
+                    label.form-label(for="brand") Brand
+                    select#brand.form-select(name="brand" required)
+                      option(value="") Select Brand
+                      each brand in brands
+                        option(value=brand.name)= brand.name
+                
+                .col-md-6
+                  .mb-3
+                    label.form-label(for="category") Category
+                    select#category.form-select(name="category" required)
+                      option(value="") Select Category
+                      each category in categories
+                        option(value=category.category_id)= category.name
+              
+              .row
+                .col-md-4
+                  .mb-3
+                    label.form-label(for="size") Size
+                    select#size.form-select(name="size" required)
+                      option(value="") Select Size
+                      option(value="XS") XS
+                      option(value="S") S
+                      option(value="M") M
+                      option(value="L") L
+                      option(value="XL") XL
+                      option(value="XXL") XXL
+                
+                .col-md-4
+                  .mb-3
+                    label.form-label(for="condition") Condition
+                    select#condition.form-select(name="condition" required)
+                      option(value="") Select Condition
+                      option(value="new") New
+                      option(value="like_new") Like New
+                      option(value="good") Good
+                      option(value="fair") Fair
+                      option(value="poor") Poor
+                
+                .col-md-4
+                  .mb-3
+                    label.form-label(for="material") Material
+                    input#material.form-control(type="text" name="material" required placeholder="e.g., Cotton, Denim")
+              
+              .mb-3
+                label.form-label(for="color") Color
+                input#color.form-control(type="text" name="color" required placeholder="e.g., Blue, Black")
+              
+              .d-grid.gap-2
+                button.btn.btn-primary(type="submit") Add Item
+                a.btn.btn-outline-secondary(href="/products") Cancel
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      const uploadBox = document.querySelector('.upload-placeholder');
+      const fileInput = document.getElementById('image');
+      const imagePreview = document.getElementById('imagePreview');
+      const previewImg = imagePreview.querySelector('img');
+      
+      // Handle click on upload box
+      uploadBox.addEventListener('click', function() {
+        fileInput.click();
+      });
+      
+      // Handle drag and drop
+      uploadBox.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('border-primary');
+      });
+      
+      uploadBox.addEventListener('dragleave', function() {
+        this.classList.remove('border-primary');
+      });
+      
+      uploadBox.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('border-primary');
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          handleFileSelect(e.dataTransfer.files[0]);
+        }
+      });
+      
+      // Handle file selection
+      fileInput.addEventListener('change', function(e) {
+        if (this.files.length) {
+          handleFileSelect(this.files[0]);
+        }
+      });
+      
+      function handleFileSelect(file) {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            imagePreview.classList.remove('d-none');
+            uploadBox.classList.add('d-none');
+          };
+          reader.readAsDataURL(file);
+        } else {
+          alert('Please select an image file');
+        }
+      }
+    }); 

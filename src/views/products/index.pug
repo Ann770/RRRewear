@@ -1,0 +1,53 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h1 All Products
+      if user
+        a.btn.btn-primary(href='/products/add') Add New Product
+
+    if products && products.length > 0
+      .row
+        each product in products
+          .col-md-4.mb-4
+            .card.h-100
+              if product.image_url
+                img.card-img-top(src=product.image_url, alt=product.name)
+              .card-body
+                h5.card-title= product.name
+                p.card-text= product.description
+                ul.list-group.list-group-flush
+                  li.list-group-item
+                    strong Brand: 
+                    = product.brand_name
+                  li.list-group-item
+                    strong Category: 
+                    = product.category_name
+                  li.list-group-item
+                    strong Size: 
+                    = product.size
+                  li.list-group-item
+                    strong Condition: 
+                    = product.item_condition
+                  li.list-group-item
+                    strong Material: 
+                    = product.material
+                  li.list-group-item
+                    strong Color: 
+                    = product.color
+                .card-footer
+                  small.text-muted
+                    | Posted by #{product.owner_name}
+                  if user && user.id !== product.user_id
+                    a.btn.btn-success.btn-sm.float-end(href=`/swap-requests/new?item_id=${product.item_id}`) Request Swap
+    else
+      .alert.alert-info
+        | No products found. 
+        if user
+          | Be the first to 
+          a.alert-link(href='/products/add') add a product
+        else
+          | Please 
+          a.alert-link(href='/login') login
+          |  to add products. 
