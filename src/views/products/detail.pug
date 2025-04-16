@@ -1,0 +1,220 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    .row
+      // Item Images
+      .col-md-6
+        .card.mb-4
+          .card-body
+            if item.image_url
+              img.img-fluid.rounded(src=item.image_url alt=item.name)
+            else
+              .bg-light.d-flex.align-items-center.justify-content-center(style="height: 400px;")
+                i.fas.fa-tshirt.fa-5x.text-muted
+
+      // Item Details
+      .col-md-6
+        .card.mb-4
+          .card-body
+            h1.mb-3= item.name
+            .item-meta.mb-3
+              span.badge.bg-primary.me-2= item.brand_name
+              span.badge.bg-secondary.me-2= item.category_name
+              span.badge.bg-info= item.item_condition
+            
+            .item-details.mb-4
+              .detail-item
+                i.fas.fa-ruler.me-2
+                span Size: #{item.size}
+              if item.color
+                .detail-item
+                  i.fas.fa-palette.me-2
+                  span Color: #{item.color}
+              if item.material
+                .detail-item
+                  i.fas.fa-tshirt.me-2
+                  span Material: #{item.material}
+            
+            p.card-text= item.description
+            
+            if item.swap_preferences
+              .swap-preferences.mt-4
+                h5.mb-3
+                  i.fas.fa-exchange-alt.me-2
+                  | Swap Preferences
+                p.mb-2
+                  strong Looking for:
+                  br
+                  | #{item.swap_preferences}
+                if item.preferred_categories
+                  p.mb-2
+                    strong Preferred Categories:
+                    br
+                    | #{item.preferred_categories}
+                if item.preferred_sizes
+                  p.mb-2
+                    strong Preferred Sizes:
+                    br
+                    | #{item.preferred_sizes}
+            
+            .item-actions.mt-4
+              if user && user.user_id !== item.user_id
+                button.btn.btn-outline-danger.wishlist-btn.mb-2(
+                  data-item-id=item.item_id
+                  class=item.is_in_wishlist ? 'active' : ''
+                )
+                  i.fas.fa-heart.me-2
+                  | #{item.is_in_wishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                button.btn.btn-primary.mt-3(
+                  data-bs-toggle="modal"
+                  data-bs-target="#swapModal"
+                )
+                  i.fas.fa-exchange-alt.me-2
+                  | Request Swap
+              else if user && user.user_id === item.user_id
+                a.btn.btn-secondary(href=`/products/${item.item_id}/edit`)
+                  i.fas.fa-edit.me-2
+                  | Edit Item
+                button.btn.btn-danger.ml-2(
+                  onclick=`confirmDelete(${item.item_id})`
+                )
+                  i.fas.fa-trash.me-2
+                  | Delete Item
+
+    // Swap Request Modal
+    .modal.fade#swapModal(tabindex="-1" aria-labelledby="swapModalLabel" aria-hidden="true")
+      .modal-dialog.modal-lg
+        .modal-content
+          .modal-header
+            h5.modal-title#swapModalLabel Request Swap
+            button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+          .modal-body
+            form#swapRequestForm
+              .mb-3
+                label.form-label(for="offeredItem") Your Item to Offer
+                select#offeredItem.form-select(name="offered_item_id" required)
+                  option(value="") Select an item
+                  if userItems && userItems.length > 0
+                    each item in userItems
+                      option(value=item.item_id)= `${item.name} - ${item.brand_name}`
+              
+              .mb-3
+                label.form-label(for="message") Message
+                textarea#message.form-control(name="message" rows="3" required placeholder="Add a message to the owner of the item you want to swap for")
+              
+              .mb-3
+                label.form-label Delivery Method
+                .form-check.mb-2
+                  input#meetup.form-check-input(type="radio" name="delivery_method" value="meetup" checked)
+                  label.form-check-label(for="meetup") Meet up at a convenient location
+                .form-check
+                  input#delivery.form-check-input(type="radio" name="delivery_method" value="delivery")
+                  label.form-check-label(for="delivery") Delivery (€2.99 charge)
+              
+              .alert.alert-info.d-none#deliveryInfo
+                i.fas.fa-info-circle.me-2
+                | A €2.99 delivery charge will be added to your swap request.
+              
+              .d-grid.gap-2
+                button.btn.btn-primary(type="submit") Send Swap Request
+                button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancel
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle wishlist button clicks
+      const wishlistBtn = document.querySelector('.wishlist-btn');
+      if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', async function() {
+          const itemId = this.dataset.itemId;
+          try {
+            const response = await fetch(`/wishlist/toggle/${itemId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            if (response.ok) {
+              this.classList.toggle('active');
+              const icon = this.querySelector('i');
+              const text = this.querySelector('span:not(.me-2)');
+              if (this.classList.contains('active')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                text.textContent = 'Remove from Wishlist';
+              } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                text.textContent = 'Add to Wishlist';
+              }
+            }
+          } catch (error) {
+            console.error('Error toggling wishlist:', error);
+          }
+        });
+      }
+
+      const deliveryRadio = document.getElementById('delivery');
+      const deliveryInfo = document.getElementById('deliveryInfo');
+      
+      deliveryRadio.addEventListener('change', function() {
+        if (this.checked) {
+          deliveryInfo.classList.remove('d-none');
+        } else {
+          deliveryInfo.classList.add('d-none');
+        }
+      });
+
+      const form = document.getElementById('swapRequestForm');
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const data = {
+          requested_item_id: #{item.item_id},
+          offered_item_id: formData.get('offered_item_id'),
+          message: formData.get('message'),
+          delivery_method: formData.get('delivery_method')
+        };
+
+        try {
+          const response = await fetch('/swap-requests', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+
+          if (response.ok) {
+            window.location.href = '/swap-requests';
+          } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to create swap request');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred while creating the swap request');
+        }
+      });
+    });
+
+    function confirmDelete(itemId) {
+      if (confirm('Are you sure you want to delete this item?')) {
+        fetch(`/products/${itemId}`, {
+          method: 'DELETE'
+        })
+        .then(response => {
+          if (response.ok) {
+            window.location.href = '/products';
+          } else {
+            alert('Error deleting item');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error deleting item');
+        });
+      }
+    } 

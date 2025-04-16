@@ -1,60 +1,90 @@
-# RRRewear - Sustainable Fashion Swapping Platform
+# RRRewear - Circular Fashion Swap Platform
 
-A modern web platform that enables users to swap clothing items sustainably, reducing fashion waste and promoting circular fashion.
+RRRewear is a sustainable fashion platform that enables users to swap pre-owned clothing items, promoting circular fashion and reducing textile waste.
 
 ## Features
 
-- User authentication and profile management
-- Clothing item listing and browsing
-- Sustainable fashion swapping system
-- Community engagement features
+- User registration and authentication
+- Clothing item listings with images and descriptions
+- Swap request system
+- Messaging system between users
+- User ratings and reviews
+- Admin panel for moderation
+- Categories and tags for easy navigation
+- Wishlist functionality
 - Real-time notifications
-- Responsive design for all devices
 
 ## Tech Stack
 
-- Frontend: HTML5, CSS3, JavaScript
+- Frontend: HTML, CSS, JavaScript, PUG templating
 - Backend: Node.js, Express.js
 - Database: MySQL
-- Authentication: JWT
-- Icons: Font Awesome
+- DevOps: Docker, Git
 
-## Getting Started
+## Prerequisites
+
+- Node.js (v14 or higher)
+- Docker and Docker Compose
+- MySQL (if running without Docker)
+
+## Setup Instructions
 
 1. Clone the repository:
 ```bash
-git clone [your-repository-url]
+git clone https://github.com/yourusername/rrrewear.git
+cd rrrewear
 ```
 
 2. Install dependencies:
 ```bash
-cd RRRewear
 npm install
 ```
 
-3. Set up the database:
-- Create a MySQL database named 'sd2-db'
-- Update database configuration in `server.js`
+3. Create a .env file in the root directory with the following variables:
+```
+DB_HOST=localhost
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_NAME=rrrewear
+SESSION_SECRET=your_session_secret
+```
 
-4. Start the server:
+4. Start the application using Docker:
+```bash
+docker-compose up --build
+```
+
+Or start without Docker:
 ```bash
 npm start
 ```
 
-5. Visit `http://localhost:3000` in your browser
+The application will be available at http://localhost:3000
+
+## Development
+
+To run the application in development mode with auto-reload:
+```bash
+npm run dev
+```
 
 ## Project Structure
 
 ```
-RRRewear/
-├── app/
-│   └── src/
-│       ├── public/
-│       │   ├── css/
-│       │   ├── js/
-│       │   └── images/
-│       └── server.js
-├── .gitignore
+rrrewear/
+├── app.js              # Main application file
+├── package.json        # Project dependencies
+├── Dockerfile          # Docker configuration
+├── docker-compose.yml  # Docker Compose configuration
+├── public/            # Static files
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── views/             # PUG templates
+│   ├── layout.pug
+│   ├── users/
+│   ├── listings/
+│   └── categories/
 └── README.md
 ```
 
@@ -68,16 +98,4 @@ RRRewear/
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contact
-
-Your Name - your.email@example.com
-Project Link: [https://github.com/yourusername/RRRewear](https://github.com/yourusername/RRRewear)
-
-1. RRRewear: Redefining Fashion Sustainably RRRewear transforms pre-loved garments into stylish, eco-friendly fashion statements. Our mission is to reduce textile waste by upcycling old clothing. Join us in creating a greener future, one rewear at a time. Let's make a positive impact on our planet while looking fabulous! 🌍✨
-
-2. Updated README with project description.
-
-3. Have created three personas.
-
+This project is licensed under the MIT License - see the LICENSE file for details. 

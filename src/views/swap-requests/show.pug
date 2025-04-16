@@ -1,0 +1,106 @@
+extends ../layouts/main
+
+block content
+  .container.mt-4
+    .row
+      .col-md-8.mx-auto
+        .card
+          .card-body
+            h2.mb-4 Swap Request Details
+            .row.mb-4
+              .col-md-6
+                h4 Requested Item
+                if request.requested_item
+                  .card
+                    .card-body
+                      img.img-fluid.mb-3(src=request.requested_item.image_url, alt=request.requested_item.title)
+                      h5= request.requested_item.title
+                      p
+                        strong Brand: 
+                        = request.requested_item.brand_name
+                      p
+                        strong Size: 
+                        = request.requested_item.size
+                      p
+                        strong Condition: 
+                        = request.requested_item.condition
+              .col-md-6
+                h4 Offered Item
+                if request.offered_item
+                  .card
+                    .card-body
+                      img.img-fluid.mb-3(src=request.offered_item.image_url, alt=request.offered_item.title)
+                      h5= request.offered_item.title
+                      p
+                        strong Brand: 
+                        = request.offered_item.brand_name
+                      p
+                        strong Size: 
+                        = request.offered_item.size
+                      p
+                        strong Condition: 
+                        = request.offered_item.condition
+            
+            .mb-4
+              h4 Message
+              p= request.message
+            
+            .mb-4
+              h4 Status
+              if request.status === 'pending'
+                span.badge.bg-warning Pending
+              else if request.status === 'accepted'
+                span.badge.bg-success Accepted
+              else if request.status === 'rejected'
+                span.badge.bg-danger Rejected
+            
+            if request.status === 'pending' && request.receiver_id === user.id
+              .d-flex.gap-2
+                button.btn.btn-success(onclick=`updateRequestStatus('${request.request_id}', 'accepted')`) Accept Request
+                button.btn.btn-danger(onclick=`updateRequestStatus('${request.request_id}', 'rejected')`) Reject Request
+            else if request.status === 'pending' && request.requester_id === user.id
+              button.btn.btn-danger(onclick=`deleteRequest('${request.request_id}')`) Delete Request
+
+block scripts
+  script.
+    async function updateRequestStatus(requestId, status) {
+      try {
+        const response = await fetch(`/swap-requests/${requestId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status })
+        });
+
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          const error = await response.json();
+          alert(error.message || 'Failed to update request status');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while updating the request status');
+      }
+    }
+
+    async function deleteRequest(requestId) {
+      if (confirm('Are you sure you want to delete this swap request?')) {
+        try {
+          const response = await fetch(`/swap-requests/${requestId}`, {
+            method: 'DELETE'
+          });
+
+          if (response.ok) {
+            window.location.href = '/swap-requests';
+          } else {
+            const error = await response.json();
+            alert(error.message || 'Failed to delete request');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred while deleting the request');
+        }
+      }
+    } 

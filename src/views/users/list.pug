@@ -1,0 +1,48 @@
+extends ../layout
+
+block content
+  .users-container
+    h1.users-title Community Members
+    .users-grid
+      each user in users
+        .user-card
+          .user-avatar
+            img(src=user.avatar_url || "/images/default-avatar.jpg", alt=user.name)
+          .user-info
+            h2 #{user.full_name || user.name}
+            p.name @#{user.name}
+            if user.bio
+              p.bio #{user.bio}
+            a.view-profile(href=`/users/${user.id}`) View Profile
+
+  .community-stats
+    h2 Community Statistics
+    .stats-grid
+      .stat-item
+        h3 Total Members
+        p= users.length
+      .stat-item
+        h3 Active Listings
+        p= totalListings || 0
+      .stat-item
+        h3 Successful Swaps
+        p= totalSwaps || 0
+
+  .community-features
+    h2 Why Join Our Community?
+    .features-grid
+      .feature-item
+        h3 Sustainable Fashion
+        p Make a positive impact on the environment by participating in circular fashion.
+      
+      .feature-item
+        h3 Save Money
+        p Get new-to-you clothes without spending a fortune.
+      
+      .feature-item
+        h3 Build Connections
+        p Connect with like-minded individuals who share your passion for sustainable fashion.
+      
+      .feature-item
+        h3 Reduce Waste
+        p Help reduce textile waste by giving clothes a second life. 

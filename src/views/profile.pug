@@ -1,0 +1,186 @@
+extends layout
+
+block content
+  .profile-container
+    .sidebar
+      .nav-options
+        a.nav-item.active(href="/profile")
+          i.fas.fa-user
+          span My Profile
+        a.nav-item(href="/closet")
+          i.fas.fa-tshirt
+          span My Closet
+        a.nav-item(href="/wishlist")
+          i.fas.fa-heart
+          span Wish List
+        a.nav-item(href="/swap-requests")
+          i.fas.fa-exchange-alt
+          span Swap Requests
+        a.nav-item(href="/logout")
+          i.fas.fa-sign-out-alt
+          span Logout
+
+    .main-content
+      .profile-header
+        .profile-picture
+          img#profile-image(src=user.avatar_url || "/images/default-avatar.jpg", alt="Profile Picture")
+          form#avatar-form(action="/profile/me" method="POST" enctype="multipart/form-data")
+            input#avatar-input(type="file" name="avatar" accept="image/*" style="display: none")
+            button.edit-picture(type="button")
+              i.fas.fa-camera
+        .profile-info
+          h1#profile-name #{user.name}
+          .location
+            i.fas.fa-map-marker-alt
+            span#profile-location #{user.location}
+          .email
+            i.fas.fa-envelope
+            span#profile-email #{user.email}
+          .rating
+            i.fas.fa-star
+            span #{user.rating}/5
+          button.edit-profile(type="button") Edit Profile
+
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Profile picture upload functionality
+      const avatarInput = document.getElementById('avatar-input');
+      const avatarForm = document.getElementById('avatar-form');
+      const profileImage = document.getElementById('profile-image');
+      const editButton = document.querySelector('.edit-picture');
+
+      editButton.addEventListener('click', function() {
+        avatarInput.click();
+      });
+
+      avatarInput.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            profileImage.src = e.target.result;
+            avatarForm.submit();
+          };
+          reader.readAsDataURL(e.target.files[0]);
+        }
+      });
+
+      // Handle avatar form submission
+      avatarForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        try {
+          const response = await fetch('/profile/me', {
+            method: 'POST',
+            body: formData
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            profileImage.src = data.avatar;
+            showNotification('Profile picture updated successfully!', 'success');
+          } else {
+            showNotification(data.message || 'Error updating profile picture', 'error');
+          }
+        } catch (error) {
+          showNotification('Error updating profile picture', 'error');
+        }
+      });
+
+      // Edit profile button functionality
+      const editProfileButton = document.querySelector('.edit-profile');
+      editProfileButton.addEventListener('click', function() {
+        // Create modal for editing profile
+        const modal = document.createElement('div');
+        modal.className = 'edit-profile-modal';
+        modal.innerHTML = `
+          <div class="modal-content">
+            <h2>Edit Profile</h2>
+            <form id="edit-profile-form">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" value="${document.getElementById('profile-name').textContent}" required>
+              </div>
+              <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value="${document.getElementById('profile-location').textContent}" required>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="${document.getElementById('profile-email').textContent}" required>
+              </div>
+              <div class="modal-buttons">
+                <button type="button" class="cancel-button">Cancel</button>
+                <button type="submit" class="save-button">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        // Add modal to page
+        document.body.appendChild(modal);
+
+        // Handle cancel button
+        const cancelButton = modal.querySelector('.cancel-button');
+        cancelButton.addEventListener('click', function() {
+          modal.remove();
+        });
+
+        // Handle form submission
+        const editProfileForm = modal.querySelector('#edit-profile-form');
+        editProfileForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          
+          const name = document.getElementById('name').value;
+          const location = document.getElementById('location').value;
+          const email = document.getElementById('email').value;
+          
+          const data = {
+            name,
+            location,
+            email
+          };
+          
+          try {
+            console.log('Sending profile update:', data);
+            const response = await fetch('/profile/edit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            console.log('Profile update response:', result);
+            
+            if (result.success) {
+              document.getElementById('profile-name').textContent = result.user.name;
+              document.getElementById('profile-location').textContent = result.user.location;
+              document.getElementById('profile-email').textContent = result.user.email;
+              modal.remove();
+              showNotification('Profile updated successfully!', 'success');
+            } else {
+              showNotification(result.message || 'Error updating profile', 'error');
+            }
+          } catch (error) {
+            console.error('Profile update error:', error);
+            showNotification('Error updating profile', 'error');
+          }
+        });
+      });
+
+      // Notification function
+      function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+    }); 

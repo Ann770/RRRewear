@@ -1,0 +1,194 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    .row
+      // Filters Sidebar
+      .col-md-3
+        .card.mb-4
+          .card-header
+            h5.mb-0 Filters
+          .card-body
+            form#filterForm
+              .mb-3
+                label.form-label(for='category') Category
+                select#category.form-select(name='category')
+                  option(value='') All Categories
+                  each category in categories
+                    option(value=category.category_id selected=selectedFilters.category === category.category_id)= category.name
+              
+              .mb-3
+                label.form-label(for='condition') Condition
+                select#condition.form-select(name='condition')
+                  option(value='') All Conditions
+                  option(value='new' selected=selectedFilters.condition === 'new') New
+                  option(value='like_new' selected=selectedFilters.condition === 'like_new') Like New
+                  option(value='good' selected=selectedFilters.condition === 'good') Good
+                  option(value='fair' selected=selectedFilters.condition === 'fair') Fair
+                  option(value='poor' selected=selectedFilters.condition === 'poor') Poor
+              
+              .mb-3
+                label.form-label(for='size') Size
+                select#size.form-select(name='size')
+                  option(value='') All Sizes
+                  option(value='XS' selected=selectedFilters.size === 'XS') XS
+                  option(value='S' selected=selectedFilters.size === 'S') S
+                  option(value='M' selected=selectedFilters.size === 'M') M
+                  option(value='L' selected=selectedFilters.size === 'L') L
+                  option(value='XL' selected=selectedFilters.size === 'XL') XL
+                  option(value='XXL' selected=selectedFilters.size === 'XXL') XXL
+              
+              .mb-3
+                label.form-label(for='brand') Brand
+                select#brand.form-select(name='brand')
+                  option(value='') All Brands
+                  each brand in brands
+                    option(value=brand.brand_id selected=selectedFilters.brand === brand.brand_id)= brand.name
+              
+              .mb-3
+                label.form-label(for='search') Search
+                input#search.form-control(type='text' name='search' placeholder='Search items...' value=selectedFilters.search)
+              
+              button.btn.btn-primary.w-100(type='submit') Apply Filters
+              if Object.keys(selectedFilters).length > 0
+                a.btn.btn-outline-secondary.w-100.mt-2(href='/products') Clear Filters
+
+      // Products Grid
+      .col-md-9
+        .d-flex.justify-content-between.align-items-center.mb-4
+          h2.mb-0= title
+          if user
+            a.btn.btn-success(href='/products/add')
+              i.fas.fa-plus.me-2
+              | Add New Item
+        
+        if clothing_items.length === 0
+          .alert.alert-info
+            i.fas.fa-info-circle.me-2
+            | No items found matching your criteria.
+        else
+          .row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-4
+            each item in clothing_items
+              .col
+                .card.h-100.product-card
+                  .product-image-container
+                    if item.image_url
+                      img.card-img-top(src=item.image_url alt=item.name)
+                    else
+                      .card-img-top.bg-light.d-flex.align-items-center.justify-content-center
+                        i.fas.fa-tshirt.fa-3x.text-muted
+                    if user && user.user_id !== item.user_id
+                      button.btn.btn-outline-danger.wishlist-btn(
+                        data-item-id=item.item_id
+                        class=item.is_in_wishlist ? 'active' : ''
+                      )
+                        i.fas.fa-heart
+                  .card-body
+                    h5.card-title= item.name
+                    .product-meta
+                      span.brand= item.brand_name
+                      span.category= item.category_name
+                    
+                    .product-details
+                      .detail-item
+                        i.fas.fa-tag
+                        span= item.item_condition
+                      .detail-item
+                        i.fas.fa-ruler
+                        span= item.size
+                      if item.color
+                        .detail-item
+                          i.fas.fa-palette
+                          span= item.color
+                    
+                    if item.swap_preferences
+                      .swap-preferences.mt-3
+                        p.small.text-muted.mb-1
+                          i.fas.fa-exchange-alt.me-1
+                          | Looking for: #{item.swap_preferences}
+                        if item.preferred_categories
+                          p.small.text-muted.mb-1
+                            i.fas.fa-tags.me-1
+                            | Preferred: #{item.preferred_categories}
+                        if item.preferred_sizes
+                          p.small.text-muted
+                            i.fas.fa-ruler-combined.me-1
+                            | Sizes: #{item.preferred_sizes}
+                    
+                    p.card-text.text-truncate= item.description
+                  .card-footer.bg-transparent
+                    .d-grid.gap-2
+                      a.btn.btn-outline-primary(href=`/products/${item.item_id}`)
+                        i.fas.fa-eye.me-2
+                        | View Details
+                      if user && user.user_id !== item.user_id
+                        button.btn.btn-outline-primary.swap-btn(
+                          data-item-id=item.item_id
+                          data-bs-toggle="modal"
+                          data-bs-target="#swapModal"
+                        )
+                          i.fas.fa-exchange-alt.me-2
+                          | Request Swap
+
+    // Swap Modal
+    .modal.fade#swapModal(tabindex="-1")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h5.modal-title Request Swap
+            button.btn-close(type="button" data-bs-dismiss="modal")
+          .modal-body
+            form#swapForm
+              .mb-3
+                label.form-label(for="swapItem") Select Item to Swap
+                select#swapItem.form-select(name="swapItem" required)
+                  option(value="") Choose an item...
+              .mb-3
+                label.form-label(for="swapMessage") Message (Optional)
+                textarea#swapMessage.form-control(name="swapMessage" rows="3")
+          .modal-footer
+            button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancel
+            button.btn.btn-primary(type="submit") Send Request
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle filter form submission
+      const filterForm = document.getElementById('filterForm');
+      filterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const params = new URLSearchParams(formData);
+        window.location.href = `/products?${params.toString()}`;
+      });
+
+      // Handle wishlist button clicks
+      const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+      wishlistButtons.forEach(button => {
+        button.addEventListener('click', async function() {
+          const itemId = this.dataset.itemId;
+          try {
+            const response = await fetch(`/wishlist/toggle/${itemId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            if (response.ok) {
+              this.classList.toggle('active');
+            }
+          } catch (error) {
+            console.error('Error toggling wishlist:', error);
+          }
+        });
+      });
+
+      // Handle swap button clicks
+      const swapButtons = document.querySelectorAll('.swap-btn');
+      swapButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const itemId = this.dataset.itemId;
+          // TODO: Implement swap request functionality
+        });
+      });
+    }); 

@@ -1,0 +1,120 @@
+extends layout
+
+block content
+  .listing-detail
+    .listing-header
+      h1= listing.title
+      if user && user.id === listing.user_id
+        .listing-actions
+          a.btn.btn-secondary(href=`/listings/${listing.id}/edit`) Edit Listing
+          form.delete-form(action=`/listings/${listing.id}/delete`, method="POST", style="display: inline;")
+            button.btn.btn-danger(type="submit", onclick="return confirm('Are you sure you want to delete this listing?')") Delete Listing
+
+    .listing-content
+      .listing-images
+        img.main-image(src=listing.image_url || "/images/placeholder.jpg", alt=listing.title)
+        // Additional images can be added here
+
+      .listing-info
+        .listing-meta
+          span.category Category: #{listing.category_name}
+          span.condition Condition: #{listing.condition}
+          if listing.size
+            span.size Size: #{listing.size}
+          if listing.brand
+            span.brand Brand: #{listing.brand}
+          span.posted-by Posted by: 
+            a(href=`/users/${listing.user_id}`)= listing.name
+
+        .description
+          h2 Description
+          p= listing.description
+
+        if listing.tags
+          .tags
+            h2 Tags
+            .tags-cloud
+              each tag in listing.tags.split(',')
+                span.tag= tag
+
+        if user && user.id !== listing.user_id
+          .swap-actions
+            form.swap-form(action="/swaps/request", method="POST")
+              input(type="hidden", name="listing_id", value=listing.id)
+              button.btn.btn-primary(type="submit") Request Swap
+            button#wishlist-btn.btn.btn-outline-primary.ml-2(data-item-id=listing.id)
+              i.fas.fa-heart
+              span.ml-1 Add to Wishlist
+
+    .seller-info
+      h2 About the Seller
+      .user-card
+        img.user-avatar(src=listing.avatar_url || "/images/default-avatar.jpg", alt=listing.name)
+        h3= listing.name
+        // Additional seller information can be added here
+
+    .related-listings
+      h2 Similar Listings
+      .grid
+        each related in relatedListings || []
+          .listing-card
+            img.listing-image(src=related.image_url || "/images/placeholder.jpg", alt=related.title)
+            .listing-info
+              h3= related.title
+              p= related.description
+              .listing-meta
+                span Category: #{related.category_name}
+                span Condition: #{related.condition}
+                if related.size
+                  span Size: #{related.size}
+              a.btn.btn-primary(href=`/listings/${related.id}`) View Details
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      const wishlistBtn = document.getElementById('wishlist-btn');
+      if (wishlistBtn) {
+        // Check if item is in wishlist
+        fetch(`/wishlist/check/${wishlistBtn.dataset.itemId}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.inWishlist) {
+              wishlistBtn.classList.add('active');
+              wishlistBtn.innerHTML = '<i class="fas fa-heart"></i><span class="ml-1">Remove from Wishlist</span>';
+            }
+          })
+          .catch(error => console.error('Error:', error));
+
+        // Handle wishlist button click
+        wishlistBtn.addEventListener('click', async function() {
+          const itemId = this.dataset.itemId;
+          const isInWishlist = this.classList.contains('active');
+          
+          try {
+            const response = await fetch(`/wishlist/${isInWishlist ? 'remove' : 'add'}/${itemId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+              if (isInWishlist) {
+                this.classList.remove('active');
+                this.innerHTML = '<i class="fas fa-heart"></i><span class="ml-1">Add to Wishlist</span>';
+              } else {
+                this.classList.add('active');
+                this.innerHTML = '<i class="fas fa-heart"></i><span class="ml-1">Remove from Wishlist</span>';
+              }
+              alert(data.message);
+            } else {
+              alert(data.message || 'Error updating wishlist');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Error updating wishlist');
+          }
+        });
+      }
+    }); 

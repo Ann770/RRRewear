@@ -1,0 +1,119 @@
+extends ../layout
+
+block content
+  .container.py-5
+    h1.mb-4 Add New Item
+    
+    form(action="/products/new" method="POST" enctype="multipart/form-data")
+      .row
+        .col-md-8
+          .card.mb-4
+            .card-body
+              h5.card-title Basic Information
+              
+              .mb-3
+                label.form-label(for="name") Item Name
+                input#name.form-control(type="text" name="name" required)
+              
+              .mb-3
+                label.form-label(for="description") Description
+                textarea#description.form-control(name="description" rows="3" required)
+              
+              .row
+                .col-md-6.mb-3
+                  label.form-label(for="brand") Brand
+                  select#brand.form-select(name="brand_id" required)
+                    option(value="") Select a brand
+                    each brand in brands
+                      option(value=brand.brand_id)= brand.name
+                
+                .col-md-6.mb-3
+                  label.form-label(for="category") Category
+                  select#category.form-select(name="category_id" required)
+                    option(value="") Select a category
+                    each category in categories
+                      option(value=category.category_id)= category.name
+              
+              .row
+                .col-md-4.mb-3
+                  label.form-label(for="condition") Condition
+                  select#condition.form-select(name="item_condition" required)
+                    option(value="") Select condition
+                    option(value="New") New
+                    option(value="Like New") Like New
+                    option(value="Good") Good
+                    option(value="Fair") Fair
+                    option(value="Poor") Poor
+                
+                .col-md-4.mb-3
+                  label.form-label(for="size") Size
+                  select#size.form-select(name="size" required)
+                    option(value="") Select size
+                    option(value="XS") XS
+                    option(value="S") S
+                    option(value="M") M
+                    option(value="L") L
+                    option(value="XL") XL
+                    option(value="XXL") XXL
+                
+                .col-md-4.mb-3
+                  label.form-label(for="color") Color
+                  input#color.form-control(type="text" name="color" required)
+          
+          .card.mb-4
+            .card-body
+              h5.card-title Swap Preferences
+              
+              .mb-3
+                label.form-label(for="swap_preferences") What would you like to swap for?
+                textarea#swap_preferences.form-control(name="swap_preferences" rows="2" placeholder="e.g., Looking for summer dresses in size M")
+              
+              .mb-3
+                label.form-label(for="preferred_categories") Preferred Categories
+                select#preferred_categories.form-select(name="preferred_categories" multiple)
+                  each category in categories
+                    option(value=category.category_id)= category.name
+              
+              .mb-3
+                label.form-label(for="preferred_sizes") Preferred Sizes
+                select#preferred_sizes.form-select(name="preferred_sizes" multiple)
+                  option(value="XS") XS
+                  option(value="S") S
+                  option(value="M") M
+                  option(value="L") L
+                  option(value="XL") XL
+                  option(value="XXL") XXL
+        
+        .col-md-4
+          .card.mb-4
+            .card-body
+              h5.card-title Images
+              
+              .mb-3
+                label.form-label(for="image") Main Image
+                input#image.form-control(type="file" name="image" accept="image/*" required)
+              
+              .mb-3
+                label.form-label(for="additional_images") Additional Images
+                input#additional_images.form-control(type="file" name="additional_images" accept="image/*" multiple)
+              
+              .form-text.text-muted
+                | Upload clear, well-lit photos of your item. Main image will be displayed first.
+          
+          .card.mb-4
+            .card-body
+              button.btn.btn-primary.w-100(type="submit") Add Item
+              
+              a.btn.btn-outline-secondary.w-100.mt-2(href="/products") Cancel
+
+block scripts
+  script.
+    // Initialize multiple select
+    document.addEventListener('DOMContentLoaded', function() {
+      const preferredCategories = document.getElementById('preferred_categories');
+      const preferredSizes = document.getElementById('preferred_sizes');
+      
+      // Add size attribute to make them visually larger
+      preferredCategories.size = 5;
+      preferredSizes.size = 5;
+    }); 

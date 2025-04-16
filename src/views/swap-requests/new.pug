@@ -1,0 +1,85 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    h1.mb-4 Create Swap Request
+    
+    .row
+      .col-md-6
+        .card.mb-4
+          .card-header
+            h5.mb-0 Requested Item
+          .card-body
+            if requestedItem.image_url
+              img.img-fluid.mb-3(src=requestedItem.image_url, alt=requestedItem.name)
+            h5= requestedItem.name
+            p.text-muted Posted by #{requestedItem.owner_name}
+            ul.list-group.list-group-flush
+              li.list-group-item
+                strong Brand: 
+                = requestedItem.brand_name
+              li.list-group-item
+                strong Size: 
+                = requestedItem.size
+              li.list-group-item
+                strong Condition: 
+                = requestedItem.item_condition
+      
+      .col-md-6
+        form#swapRequestForm(action='/swap-requests', method='POST')
+          input(type='hidden', name='requested_item_id', value=requestedItem.item_id)
+          
+          .form-group.mb-3
+            label.form-label(for='offered_item_id') Select Item to Offer
+            select.form-select#offered_item_id(name='offered_item_id', required)
+              option(value='') -- Select an item --
+              each item in userItems
+                option(value=item.item_id)= item.name + ' (' + item.brand_name + ', ' + item.size + ')'
+          
+          .form-group.mb-3
+            label.form-label(for='message') Message (optional)
+            textarea.form-control#message(name='message', rows='3', placeholder='Add a message to the owner...')
+          
+          .form-group.mb-3
+            label.form-label(for='delivery_method') Delivery Method
+            select.form-select#delivery_method(name='delivery_method', required)
+              option(value='') -- Select delivery method --
+              option(value='in_person') In Person
+              option(value='shipping') Shipping
+          
+          button.btn.btn-primary.w-100(type='submit') Send Swap Request
+          a.btn.btn-outline-secondary.w-100.mt-2(href='/products') Cancel
+
+block scripts
+  script.
+    document.getElementById('swapRequestForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        requested_item_id: this.requested_item_id.value,
+        offered_item_id: this.offered_item_id.value,
+        message: this.message.value,
+        delivery_method: this.delivery_method.value
+      };
+      
+      try {
+        const response = await fetch('/swap-requests', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          window.location.href = '/swap-requests';
+        } else {
+          alert(data.message || 'Error creating swap request');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error creating swap request');
+      }
+    }); 

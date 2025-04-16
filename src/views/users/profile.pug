@@ -1,0 +1,96 @@
+extends ../layout
+
+block content
+  .profile-container
+    .profile-header
+      .profile-info
+        img.user-avatar(src=user.avatar_url || "/images/default-avatar.jpg", alt=user.name)
+        .user-details
+          h1= user.name
+          if user.full_name
+            p.name= user.full_name
+          if user.bio
+            p.bio= user.bio
+          .profile-stats
+            span.clothing-items #{user.total_clothing_items || 0} Items
+            span.swaps #{user.total_swaps || 0} Swaps
+            span.rating #{user.rating || 'No ratings yet'}
+        if user.id === currentUser?.id
+          a.btn.btn-secondary(href="/profile/edit") Edit Profile
+
+    .user-clothing-items
+      h2 My Items
+      if user.clothing_items && user.clothing_items.length > 0
+        .row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-4
+          each item in user.clothing_items
+            .col
+              .card.h-100
+                if item.image_url
+                  img.card-img-top(src=item.image_url alt=item.name)
+                else
+                  .card-img-top.bg-light.d-flex.align-items-center.justify-content-center
+                    i.fas.fa-tshirt.fa-3x.text-muted
+                .card-body
+                  h5.card-title= item.name
+                  p.card-text= item.description
+                  .item-meta
+                    span Category: #{item.category_name}
+                    span Condition: #{item.item_condition}
+                    if item.size
+                      span Size: #{item.size}
+                .card-footer
+                  a.btn.btn-primary(href=`/products/${item.item_id}`) View Details
+                  a.btn.btn-secondary(href=`/products/${item.item_id}/edit`) Edit
+      else
+        p.no-items No items yet.
+        a(href="/products/add") Add your first item!
+
+    .user-swaps
+      h2 My Swaps
+      if user.swaps && user.swaps.length > 0
+        .swaps-list
+          each swap in user.swaps
+            .swap-card
+              .swap-info
+                h3= swap.item_name
+                p Status: #{swap.status}
+                p Date: #{new Date(swap.created_at).toLocaleDateString()}
+              .swap-actions
+                if swap.status === 'pending' && user.user_id === swap.item_user_id
+                  button.btn.btn-success.accept-swap(data-swap-id=swap.swap_id) Accept
+                  button.btn.btn-danger.reject-swap(data-swap-id=swap.swap_id) Reject
+      else
+        p.no-swaps No swap history yet.
+
+    .user-activity
+      h2 Recent Activity
+      if user.activity && user.activity.length > 0
+        .activity-list
+          each activity in user.activity
+            .activity-item
+              p= activity.description
+              span.date= new Date(activity.created_at).toLocaleDateString()
+      else
+        p.no-activity No recent activity.
+
+  if user.id === currentUser?.id
+    .profile-settings
+      h2 Account Settings
+      .settings-grid
+        .setting-item
+          h3 Email Notifications
+          form.notification-settings(action="/profile/notifications", method="POST")
+            .form-group
+              label
+                input(type="checkbox", name="email_notifications", checked=user.email_notifications)
+                | Receive email notifications
+            button.btn.btn-secondary(type="submit") Save Settings
+
+        .setting-item
+          h3 Privacy Settings
+          form.privacy-settings(action="/profile/privacy", method="POST")
+            .form-group
+              label
+                input(type="checkbox", name="public_profile", checked=user.public_profile)
+                | Make profile public
+            button.btn.btn-secondary(type="submit") Save Settings 

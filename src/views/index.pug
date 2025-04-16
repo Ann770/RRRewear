@@ -1,0 +1,58 @@
+extends layout
+
+block content
+  main.main-content
+    // Hero Section
+    section.hero
+      .hero-content
+        h1.hero-title Join the Circular Fashion Movement
+        p.hero-description Swap your clothes sustainably and join a community of eco-conscious fashion lovers.
+        if user
+          a.hero-button(href="/browse") Swap Now
+        else
+          a.hero-button(href="/login") Swap Now
+      .hero-image-container
+        img.hero-image(src="/images/swap-illustration.svg" alt="Sustainable Fashion Swap Illustration")
+
+  // How It Works Section
+  section.how-it-works
+    h2.section-title How It Works
+    p.section-description
+      | RRRewear is your gateway to a sustainable, stylish, and community-driven fashion ecosystem. 
+      | We make clothing swaps easy, eco-conscious, and enjoyable—because fashion can be both fabulous and ethical.
+    .steps-grid
+      .step-card
+        .step-number 1
+        h3.step-title Choose What You Love
+        p.step-description
+          | Browse a wide range of clothing items shared by other users. If you like something, 
+          | send a swap request to the owner. Once both users agree to the swap, the process begins!
+      .step-card
+        .step-number 2
+        h3.step-title Send Your Clothes
+        p.step-description
+          | Package your clothing and ship it to the RRRewear headquarters using our pre-paid label. 
+          | A small shipping fee of just £2.99 will apply.
+      .step-card
+        .step-number 3
+        h3.step-title We Handle the Rest
+        p.step-description
+          | Once your clothing arrives, we ensure it's sent to the respective user you swapped with—completely 
+          | free of charge! You'll soon receive the item you loved, making the whole process seamless and rewarding.
+
+  // Categories Section
+  section.categories
+    h2.section-title Shop by Category
+    .categories-grid
+      a.category-card(href="/categories/women")
+        h3 Women
+        p Browse women's clothing
+      a.category-card(href="/categories/men")
+        h3 Men
+        p Browse men's clothing
+      a.category-card(href="/categories/accessories")
+        h3 Accessories
+        p Jewelry, bags, and more
+      a.category-card(href="/categories/shoes")
+        h3 Shoes
+        p Footwear for all occasions 
