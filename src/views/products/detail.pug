@@ -66,10 +66,7 @@ block content
                 )
                   i.fas.fa-heart.me-2
                   | #{item.is_in_wishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                button.btn.btn-primary.mt-3(
-                  data-bs-toggle="modal"
-                  data-bs-target="#swapModal"
-                )
+                a.btn.btn-primary.mt-3(href=`/swap-requests/new?item_id=${item.item_id}`)
                   i.fas.fa-exchange-alt.me-2
                   | Request Swap
               else if user && user.user_id === item.user_id
@@ -122,91 +119,17 @@ block content
 
 block scripts
   script.
-    document.addEventListener('DOMContentLoaded', function() {
-      // Handle wishlist button clicks
-      const wishlistBtn = document.querySelector('.wishlist-btn');
-      if (wishlistBtn) {
-        wishlistBtn.addEventListener('click', async function() {
-          const itemId = this.dataset.itemId;
-          try {
-            const response = await fetch(`/wishlist/toggle/${itemId}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            });
-            if (response.ok) {
-              this.classList.toggle('active');
-              const icon = this.querySelector('i');
-              const text = this.querySelector('span:not(.me-2)');
-              if (this.classList.contains('active')) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                text.textContent = 'Remove from Wishlist';
-              } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                text.textContent = 'Add to Wishlist';
-              }
-            }
-          } catch (error) {
-            console.error('Error toggling wishlist:', error);
-          }
-        });
-      }
-
-      const deliveryRadio = document.getElementById('delivery');
-      const deliveryInfo = document.getElementById('deliveryInfo');
-      
-      deliveryRadio.addEventListener('change', function() {
-        if (this.checked) {
-          deliveryInfo.classList.remove('d-none');
-        } else {
-          deliveryInfo.classList.add('d-none');
-        }
-      });
-
-      const form = document.getElementById('swapRequestForm');
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const data = {
-          requested_item_id: #{item.item_id},
-          offered_item_id: formData.get('offered_item_id'),
-          message: formData.get('message'),
-          delivery_method: formData.get('delivery_method')
-        };
-
-        try {
-          const response = await fetch('/swap-requests', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-          });
-
-          if (response.ok) {
-            window.location.href = '/swap-requests';
-          } else {
-            const error = await response.json();
-            alert(error.message || 'Failed to create swap request');
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('An error occurred while creating the swap request');
-        }
-      });
-    });
-
     function confirmDelete(itemId) {
       if (confirm('Are you sure you want to delete this item?')) {
         fetch(`/products/${itemId}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         })
-        .then(response => {
-          if (response.ok) {
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
             window.location.href = '/products';
           } else {
             alert('Error deleting item');
@@ -217,4 +140,79 @@ block scripts
           alert('Error deleting item');
         });
       }
-    } 
+    }
+
+    // Wishlist button functionality
+    document.querySelectorAll('.wishlist-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const itemId = this.dataset.itemId;
+        const isActive = this.classList.contains('active');
+        
+        fetch(`/wishlist/${isActive ? 'remove' : 'add'}/${itemId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            this.classList.toggle('active');
+            this.querySelector('i').classList.toggle('fa-heart');
+            this.querySelector('i').classList.toggle('fa-heart-broken');
+            this.textContent = isActive ? 'Add to Wishlist' : 'Remove from Wishlist';
+          } else {
+            alert(data.message || 'Error updating wishlist');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error updating wishlist');
+        });
+      });
+    });
+
+    const deliveryRadio = document.getElementById('delivery');
+    const deliveryInfo = document.getElementById('deliveryInfo');
+    
+    deliveryRadio.addEventListener('change', function() {
+      if (this.checked) {
+        deliveryInfo.classList.remove('d-none');
+      } else {
+        deliveryInfo.classList.add('d-none');
+      }
+    });
+
+    const form = document.getElementById('swapRequestForm');
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = {
+        requested_item_id: #{item.item_id},
+        offered_item_id: formData.get('offered_item_id'),
+        message: formData.get('message'),
+        delivery_method: formData.get('delivery_method')
+      };
+
+      try {
+        const response = await fetch('/swap-requests', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          window.location.href = '/swap-requests';
+        } else {
+          const error = await response.json();
+          alert(error.message || 'Failed to create swap request');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while creating the swap request');
+      }
+    });
+  </script> 

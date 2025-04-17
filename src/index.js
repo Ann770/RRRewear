@@ -51,11 +51,17 @@ app.use("/reviews", require("./routes/reviews"));
 // Home route - Show all products
 app.get('/', (req, res) => {
   const query = `
-    SELECT ci.*, b.name as brand_name, c.name as category_name, u.name as owner_name
+    SELECT 
+      ci.*, 
+      b.name as brand_name, 
+      c.name as category_name, 
+      u.name as owner_name,
+      u.email as owner_email
     FROM clothing_items ci
     JOIN brands b ON ci.brand_id = b.brand_id
     JOIN categories c ON ci.category_id = c.category_id
     JOIN users u ON ci.user_id = u.user_id
+    WHERE ci.is_available = 1
     ORDER BY ci.created_at DESC
   `;
   
@@ -65,41 +71,40 @@ app.get('/', (req, res) => {
   // Get all brands
   const brandsQuery = 'SELECT * FROM brands ORDER BY name';
   
-  // Execute queries in parallel
-  Promise.all([
-    new Promise((resolve, reject) => {
-      db.query(categoriesQuery, (err, categories) => {
-        if (err) reject(err);
-        else resolve(categories || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
-      db.query(brandsQuery, (err, brands) => {
-        if (err) reject(err);
-        else resolve(brands || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
+  // First get categories
+  db.query(categoriesQuery, (err, categories) => {
+    if (err) {
+      console.error('Error fetching categories:', err);
+      req.flash('error_msg', 'Error loading categories');
+      return res.redirect('/');
+    }
+    
+    // Then get brands
+    db.query(brandsQuery, (err, brands) => {
+      if (err) {
+        console.error('Error fetching brands:', err);
+        req.flash('error_msg', 'Error loading brands');
+        return res.redirect('/');
+      }
+      
+      // Finally get products
       db.query(query, (err, products) => {
-        if (err) reject(err);
-        else resolve(products || []);
+        if (err) {
+          console.error('Error fetching products:', err);
+          req.flash('error_msg', 'Error loading products');
+          return res.redirect('/');
+        }
+        
+        res.render('products/list', { 
+          title: 'All Products',
+          clothing_items: products || [],
+          categories: categories || [],
+          brands: brands || [],
+          selectedFilters: {},
+          user: req.session.user
+        });
       });
-    })
-  ])
-  .then(([categories, brands, products]) => {
-    res.render('products/list', { 
-      title: 'All Products',
-      clothing_items: products,
-      categories: categories,
-      brands: brands,
-      selectedFilters: {},
-      user: req.session.user
     });
-  })
-  .catch(err => {
-    console.error('Error fetching data:', err);
-    req.flash('error_msg', 'Error loading products');
-    res.redirect('/');
   });
 });
 
@@ -146,12 +151,17 @@ app.get('/products', (req, res) => {
 // Categories routes
 app.get('/categories/women', (req, res) => {
   const query = `
-    SELECT ci.*, b.name as brand_name, c.name as category_name, u.name as owner_name
+    SELECT 
+      ci.*, 
+      b.name as brand_name, 
+      c.name as category_name, 
+      u.name as owner_name,
+      u.email as owner_email
     FROM clothing_items ci
     JOIN brands b ON ci.brand_id = b.brand_id
     JOIN categories c ON ci.category_id = c.category_id
     JOIN users u ON ci.user_id = u.user_id
-    WHERE c.name = 'Women'
+    WHERE c.name = 'Women' AND ci.is_available = 1
     ORDER BY ci.created_at DESC
   `;
   
@@ -161,52 +171,56 @@ app.get('/categories/women', (req, res) => {
   // Get all brands
   const brandsQuery = 'SELECT * FROM brands ORDER BY name';
   
-  // Execute queries in parallel
-  Promise.all([
-    new Promise((resolve, reject) => {
-      db.query(categoriesQuery, (err, categories) => {
-        if (err) reject(err);
-        else resolve(categories || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
-      db.query(brandsQuery, (err, brands) => {
-        if (err) reject(err);
-        else resolve(brands || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
+  // First get categories
+  db.query(categoriesQuery, (err, categories) => {
+    if (err) {
+      console.error('Error fetching categories:', err);
+      req.flash('error_msg', 'Error loading categories');
+      return res.redirect('/');
+    }
+    
+    // Then get brands
+    db.query(brandsQuery, (err, brands) => {
+      if (err) {
+        console.error('Error fetching brands:', err);
+        req.flash('error_msg', 'Error loading brands');
+        return res.redirect('/');
+      }
+      
+      // Finally get products
       db.query(query, (err, products) => {
-        if (err) reject(err);
-        else resolve(products || []);
+        if (err) {
+          console.error('Error fetching products:', err);
+          req.flash('error_msg', 'Error loading women\'s products');
+          return res.redirect('/');
+        }
+        
+        res.render('products/list', { 
+          title: 'Women\'s Clothing',
+          clothing_items: products || [],
+          categories: categories || [],
+          brands: brands || [],
+          selectedFilters: { category: 6 }, // Women category ID
+          user: req.session.user
+        });
       });
-    })
-  ])
-  .then(([categories, brands, products]) => {
-    res.render('products/list', { 
-      title: 'Women\'s Clothing',
-      clothing_items: products,
-      categories: categories,
-      brands: brands,
-      selectedFilters: { category: 6 }, // Women category ID
-      user: req.session.user
     });
-  })
-  .catch(err => {
-    console.error('Error fetching data:', err);
-    req.flash('error_msg', 'Error loading women\'s products');
-    res.redirect('/');
   });
 });
 
 app.get('/categories/men', (req, res) => {
   const query = `
-    SELECT ci.*, b.name as brand_name, c.name as category_name, u.name as owner_name
+    SELECT 
+      ci.*, 
+      b.name as brand_name, 
+      c.name as category_name, 
+      u.name as owner_name,
+      u.email as owner_email
     FROM clothing_items ci
     JOIN brands b ON ci.brand_id = b.brand_id
     JOIN categories c ON ci.category_id = c.category_id
     JOIN users u ON ci.user_id = u.user_id
-    WHERE c.name = 'Men'
+    WHERE c.name = 'Men' AND ci.is_available = 1
     ORDER BY ci.created_at DESC
   `;
   
@@ -216,52 +230,56 @@ app.get('/categories/men', (req, res) => {
   // Get all brands
   const brandsQuery = 'SELECT * FROM brands ORDER BY name';
   
-  // Execute queries in parallel
-  Promise.all([
-    new Promise((resolve, reject) => {
-      db.query(categoriesQuery, (err, categories) => {
-        if (err) reject(err);
-        else resolve(categories || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
-      db.query(brandsQuery, (err, brands) => {
-        if (err) reject(err);
-        else resolve(brands || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
+  // First get categories
+  db.query(categoriesQuery, (err, categories) => {
+    if (err) {
+      console.error('Error fetching categories:', err);
+      req.flash('error_msg', 'Error loading categories');
+      return res.redirect('/');
+    }
+    
+    // Then get brands
+    db.query(brandsQuery, (err, brands) => {
+      if (err) {
+        console.error('Error fetching brands:', err);
+        req.flash('error_msg', 'Error loading brands');
+        return res.redirect('/');
+      }
+      
+      // Finally get products
       db.query(query, (err, products) => {
-        if (err) reject(err);
-        else resolve(products || []);
+        if (err) {
+          console.error('Error fetching products:', err);
+          req.flash('error_msg', 'Error loading men\'s products');
+          return res.redirect('/');
+        }
+        
+        res.render('products/list', { 
+          title: 'Men\'s Clothing',
+          clothing_items: products || [],
+          categories: categories || [],
+          brands: brands || [],
+          selectedFilters: { category: 5 }, // Men category ID
+          user: req.session.user
+        });
       });
-    })
-  ])
-  .then(([categories, brands, products]) => {
-    res.render('products/list', { 
-      title: 'Men\'s Clothing',
-      clothing_items: products,
-      categories: categories,
-      brands: brands,
-      selectedFilters: { category: 5 }, // Men category ID
-      user: req.session.user
     });
-  })
-  .catch(err => {
-    console.error('Error fetching data:', err);
-    req.flash('error_msg', 'Error loading men\'s products');
-    res.redirect('/');
-  });
+    });
 });
 
 app.get('/categories/accessories', (req, res) => {
   const query = `
-    SELECT ci.*, b.name as brand_name, c.name as category_name, u.name as owner_name
+    SELECT 
+      ci.*, 
+      b.name as brand_name, 
+      c.name as category_name, 
+      u.name as owner_name,
+      u.email as owner_email
     FROM clothing_items ci
     JOIN brands b ON ci.brand_id = b.brand_id
     JOIN categories c ON ci.category_id = c.category_id
     JOIN users u ON ci.user_id = u.user_id
-    WHERE c.name = 'Accessories'
+    WHERE c.name = 'Accessories' AND ci.is_available = 1
     ORDER BY ci.created_at DESC
   `;
   
@@ -271,52 +289,56 @@ app.get('/categories/accessories', (req, res) => {
   // Get all brands
   const brandsQuery = 'SELECT * FROM brands ORDER BY name';
   
-  // Execute queries in parallel
-  Promise.all([
-    new Promise((resolve, reject) => {
-      db.query(categoriesQuery, (err, categories) => {
-        if (err) reject(err);
-        else resolve(categories || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
-      db.query(brandsQuery, (err, brands) => {
-        if (err) reject(err);
-        else resolve(brands || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
+  // First get categories
+  db.query(categoriesQuery, (err, categories) => {
+    if (err) {
+      console.error('Error fetching categories:', err);
+      req.flash('error_msg', 'Error loading categories');
+      return res.redirect('/');
+    }
+    
+    // Then get brands
+    db.query(brandsQuery, (err, brands) => {
+      if (err) {
+        console.error('Error fetching brands:', err);
+        req.flash('error_msg', 'Error loading brands');
+        return res.redirect('/');
+      }
+      
+      // Finally get products
       db.query(query, (err, products) => {
-        if (err) reject(err);
-        else resolve(products || []);
+        if (err) {
+          console.error('Error fetching products:', err);
+          req.flash('error_msg', 'Error loading accessories');
+          return res.redirect('/');
+        }
+        
+        res.render('products/list', { 
+          title: 'Accessories',
+          clothing_items: products || [],
+          categories: categories || [],
+          brands: brands || [],
+          selectedFilters: { category: 7 }, // Accessories category ID
+          user: req.session.user
+        });
       });
-    })
-  ])
-  .then(([categories, brands, products]) => {
-    res.render('products/list', { 
-      title: 'Accessories',
-      clothing_items: products,
-      categories: categories,
-      brands: brands,
-      selectedFilters: { category: 7 }, // Accessories category ID
-      user: req.session.user
     });
-  })
-  .catch(err => {
-    console.error('Error fetching data:', err);
-    req.flash('error_msg', 'Error loading accessories');
-    res.redirect('/');
-  });
+    });
 });
 
 app.get('/categories/shoes', (req, res) => {
   const query = `
-    SELECT ci.*, b.name as brand_name, c.name as category_name, u.name as owner_name
+    SELECT 
+      ci.*, 
+      b.name as brand_name, 
+      c.name as category_name, 
+      u.name as owner_name,
+      u.email as owner_email
     FROM clothing_items ci
     JOIN brands b ON ci.brand_id = b.brand_id
     JOIN categories c ON ci.category_id = c.category_id
     JOIN users u ON ci.user_id = u.user_id
-    WHERE c.name = 'Shoes'
+    WHERE c.name = 'Shoes' AND ci.is_available = 1
     ORDER BY ci.created_at DESC
   `;
   
@@ -326,42 +348,41 @@ app.get('/categories/shoes', (req, res) => {
   // Get all brands
   const brandsQuery = 'SELECT * FROM brands ORDER BY name';
   
-  // Execute queries in parallel
-  Promise.all([
-    new Promise((resolve, reject) => {
-      db.query(categoriesQuery, (err, categories) => {
-        if (err) reject(err);
-        else resolve(categories || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
-      db.query(brandsQuery, (err, brands) => {
-        if (err) reject(err);
-        else resolve(brands || []);
-      });
-    }),
-    new Promise((resolve, reject) => {
+  // First get categories
+  db.query(categoriesQuery, (err, categories) => {
+    if (err) {
+      console.error('Error fetching categories:', err);
+      req.flash('error_msg', 'Error loading categories');
+      return res.redirect('/');
+    }
+    
+    // Then get brands
+    db.query(brandsQuery, (err, brands) => {
+      if (err) {
+        console.error('Error fetching brands:', err);
+        req.flash('error_msg', 'Error loading brands');
+        return res.redirect('/');
+      }
+      
+      // Finally get products
       db.query(query, (err, products) => {
-        if (err) reject(err);
-        else resolve(products || []);
+        if (err) {
+          console.error('Error fetching products:', err);
+          req.flash('error_msg', 'Error loading shoes');
+          return res.redirect('/');
+        }
+        
+        res.render('products/list', { 
+          title: 'Shoes',
+          clothing_items: products || [],
+          categories: categories || [],
+          brands: brands || [],
+          selectedFilters: { category: 8 }, // Shoes category ID
+          user: req.session.user
+        });
       });
-    })
-  ])
-  .then(([categories, brands, products]) => {
-    res.render('products/list', { 
-      title: 'Shoes',
-      clothing_items: products,
-      categories: categories,
-      brands: brands,
-      selectedFilters: { category: 8 }, // Shoes category ID
-      user: req.session.user
     });
-  })
-  .catch(err => {
-    console.error('Error fetching data:', err);
-    req.flash('error_msg', 'Error loading shoes');
-    res.redirect('/');
-  });
+    });
 });
 
 // Error handling middleware

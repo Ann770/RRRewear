@@ -14,43 +14,46 @@ block content
                 label.form-label(for='category') Category
                 select#category.form-select(name='category')
                   option(value='') All Categories
-                  each category in categories
-                    option(value=category.category_id selected=selectedFilters.category === category.category_id)= category.name
+                  - const categoriesList = categories || []
+                  each category in categoriesList
+                    option(value=category.category_id selected=selectedFilters && selectedFilters.category === category.category_id)= category.name
               
               .mb-3
                 label.form-label(for='condition') Condition
                 select#condition.form-select(name='condition')
                   option(value='') All Conditions
-                  option(value='new' selected=selectedFilters.condition === 'new') New
-                  option(value='like_new' selected=selectedFilters.condition === 'like_new') Like New
-                  option(value='good' selected=selectedFilters.condition === 'good') Good
-                  option(value='fair' selected=selectedFilters.condition === 'fair') Fair
-                  option(value='poor' selected=selectedFilters.condition === 'poor') Poor
+                  - const filters = selectedFilters || {}
+                  option(value='new' selected=filters.condition === 'new') New
+                  option(value='like_new' selected=filters.condition === 'like_new') Like New
+                  option(value='good' selected=filters.condition === 'good') Good
+                  option(value='fair' selected=filters.condition === 'fair') Fair
+                  option(value='poor' selected=filters.condition === 'poor') Poor
               
               .mb-3
                 label.form-label(for='size') Size
                 select#size.form-select(name='size')
                   option(value='') All Sizes
-                  option(value='XS' selected=selectedFilters.size === 'XS') XS
-                  option(value='S' selected=selectedFilters.size === 'S') S
-                  option(value='M' selected=selectedFilters.size === 'M') M
-                  option(value='L' selected=selectedFilters.size === 'L') L
-                  option(value='XL' selected=selectedFilters.size === 'XL') XL
-                  option(value='XXL' selected=selectedFilters.size === 'XXL') XXL
+                  option(value='XS' selected=filters.size === 'XS') XS
+                  option(value='S' selected=filters.size === 'S') S
+                  option(value='M' selected=filters.size === 'M') M
+                  option(value='L' selected=filters.size === 'L') L
+                  option(value='XL' selected=filters.size === 'XL') XL
+                  option(value='XXL' selected=filters.size === 'XXL') XXL
               
               .mb-3
                 label.form-label(for='brand') Brand
                 select#brand.form-select(name='brand')
                   option(value='') All Brands
-                  each brand in brands
-                    option(value=brand.brand_id selected=selectedFilters.brand === brand.brand_id)= brand.name
+                  - const brandsList = brands || []
+                  each brand in brandsList
+                    option(value=brand.brand_id selected=filters.brand === brand.brand_id)= brand.name
               
               .mb-3
                 label.form-label(for='search') Search
-                input#search.form-control(type='text' name='search' placeholder='Search items...' value=selectedFilters.search)
+                input#search.form-control(type='text' name='search' placeholder='Search items...' value=filters.search || '')
               
               button.btn.btn-primary.w-100(type='submit') Apply Filters
-              if Object.keys(selectedFilters).length > 0
+              if Object.keys(filters).length > 0
                 a.btn.btn-outline-secondary.w-100.mt-2(href='/products') Clear Filters
 
       // Products Grid
@@ -62,13 +65,14 @@ block content
               i.fas.fa-plus.me-2
               | Add New Item
         
-        if clothing_items.length === 0
+        - const itemsList = clothing_items || []
+        if itemsList.length === 0
           .alert.alert-info
             i.fas.fa-info-circle.me-2
             | No items found matching your criteria.
         else
           .row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-4
-            each item in clothing_items
+            each item in itemsList
               .col
                 .card.h-100.product-card
                   .product-image-container
@@ -81,6 +85,7 @@ block content
                       button.btn.btn-outline-danger.wishlist-btn(
                         data-item-id=item.item_id
                         class=item.is_in_wishlist ? 'active' : ''
+                        onclick=`toggleWishlist(${item.item_id})`
                       )
                         i.fas.fa-heart
                   .card-body
@@ -191,4 +196,28 @@ block scripts
           // TODO: Implement swap request functionality
         });
       });
-    }); 
+    });
+
+    function toggleWishlist(itemId) {
+      fetch('/wishlist/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ item_id: itemId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const wishlistBtn = document.querySelector(`.wishlist-btn[data-item-id="${itemId}"]`);
+          wishlistBtn.classList.toggle('active');
+          // Show success message
+          const toast = new bootstrap.Toast(document.createElement('div'));
+          toast.show();
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update wishlist');
+      });
+    } 

@@ -2,9 +2,13 @@ extends ../layout
 
 block content
   .container.mt-4
-    h1.mb-4 Create Swap Request
-    
+    h1.mb-4 Request Swap
+
+    if error_msg
+      .alert.alert-danger= error_msg
+
     .row
+      // Requested Item
       .col-md-6
         .card.mb-4
           .card-header
@@ -13,73 +17,197 @@ block content
             if requestedItem.image_url
               img.img-fluid.mb-3(src=requestedItem.image_url, alt=requestedItem.name)
             h5= requestedItem.name
-            p.text-muted Posted by #{requestedItem.owner_name}
-            ul.list-group.list-group-flush
-              li.list-group-item
-                strong Brand: 
-                = requestedItem.brand_name
-              li.list-group-item
-                strong Size: 
-                = requestedItem.size
-              li.list-group-item
-                strong Condition: 
-                = requestedItem.item_condition
-      
+            p
+              strong Owner: 
+              = requestedItem.owner_name
+            p
+              strong Brand: 
+              = requestedItem.brand_name
+            p
+              strong Category: 
+              = requestedItem.category_name
+            p
+              strong Size: 
+              = requestedItem.size
+            p
+              strong Condition: 
+              = requestedItem.condition
+            p
+              strong Description: 
+              = requestedItem.description
+
+      // User's Items to Offer
       .col-md-6
-        form#swapRequestForm(action='/swap-requests', method='POST')
-          input(type='hidden', name='requested_item_id', value=requestedItem.item_id)
-          
-          .form-group.mb-3
-            label.form-label(for='offered_item_id') Select Item to Offer
-            select.form-select#offered_item_id(name='offered_item_id', required)
-              option(value='') -- Select an item --
-              each item in userItems
-                option(value=item.item_id)= item.name + ' (' + item.brand_name + ', ' + item.size + ')'
-          
-          .form-group.mb-3
-            label.form-label(for='message') Message (optional)
-            textarea.form-control#message(name='message', rows='3', placeholder='Add a message to the owner...')
-          
-          .form-group.mb-3
-            label.form-label(for='delivery_method') Delivery Method
-            select.form-select#delivery_method(name='delivery_method', required)
-              option(value='') -- Select delivery method --
-              option(value='in_person') In Person
-              option(value='shipping') Shipping
-          
-          button.btn.btn-primary.w-100(type='submit') Send Swap Request
-          a.btn.btn-outline-secondary.w-100.mt-2(href='/products') Cancel
+        .card
+          .card-header
+            h5.mb-0 Your Items to Offer
+          .card-body
+            form(action='/swap-requests', method='POST')
+              input(type='hidden', name='requested_item_id', value=requestedItem.item_id)
+              
+              // Tabs for item selection
+              ul.nav.nav-tabs.mb-3#itemTabs(role='tablist')
+                li.nav-item
+                  a.nav-link.active#existing-tab(data-toggle='tab', href='#existing', role='tab') Use Existing Items
+                li.nav-item
+                  a.nav-link#new-tab(data-toggle='tab', href='#new', role='tab') Add New Item
+
+              .tab-content#itemTabsContent
+                // Existing Items Tab
+                .tab-pane.fade.show.active#existing(role='tabpanel')
+                  if userItems && userItems.length > 0
+                    each item in userItems
+                      .card.mb-3
+                        .card-body
+                          .form-check
+                            input.form-check-input(type='checkbox', name='offered_items[]', value=item.item_id, id=`item-${item.item_id}`)
+                            label.form-check-label(for=`item-${item.item_id}`)
+                              if item.image_url
+                                img.img-fluid.mb-2(src=item.image_url, alt=item.name, style='max-height: 100px')
+                              h6= item.name
+                              p.mb-0
+                                small
+                                  strong Brand: 
+                                  = item.brand_name
+                                  br
+                                  strong Category: 
+                                  = item.category_name
+                                  br
+                                  strong Size: 
+                                  = item.size
+                                  br
+                                  strong Condition: 
+                                  = item.condition
+                  else
+                    .alert.alert-warning
+                      | You don't have any items available to offer for swap.
+
+                // New Item Tab
+                .tab-pane.fade#new(role='tabpanel')
+                  .form-group
+                    label(for='new_item_name') Item Name
+                    input.form-control#new_item_name(type='text', name='new_item_name')
+                  .form-group
+                    label(for='new_item_brand') Brand
+                    select.form-control#new_item_brand(name='new_item_brand')
+                      option(value='') Select Brand
+                      // Brands will be populated via AJAX
+                  .form-group
+                    label(for='new_item_category') Category
+                    select.form-control#new_item_category(name='new_item_category')
+                      option(value='') Select Category
+                      // Categories will be populated via AJAX
+                  .form-group
+                    label(for='new_item_size') Size
+                    input.form-control#new_item_size(type='text', name='new_item_size')
+                  .form-group
+                    label(for='new_item_condition') Condition
+                    select.form-control#new_item_condition(name='new_item_condition')
+                      option(value='') Select Condition
+                      option(value='new') New
+                      option(value='like_new') Like New
+                      option(value='good') Good
+                      option(value='fair') Fair
+                  .form-group
+                    label(for='new_item_description') Description
+                    textarea.form-control#new_item_description(name='new_item_description', rows='3')
+                  .form-group
+                    label(for='new_item_image') Image
+                    input.form-control#new_item_image(type='file', name='new_item_image', accept='image/*')
+
+              .form-group.mt-3
+                label(for='message') Message to Seller
+                textarea.form-control#message(name='message', rows='3', required)
+
+              .form-group.mt-3
+                label(for='delivery_method') Delivery Method
+                select.form-control#delivery_method(name='delivery_method', required)
+                  option(value='') Select delivery method
+                  option(value='meetup') Meetup
+                  option(value='shipping') Shipping
+
+              // Shipping Address Section (hidden by default)
+              #shipping_address_section(style='display: none;')
+                .form-group.mt-3
+                  label(for='shipping_address') Shipping Address
+                  if userAddress
+                    textarea.form-control#shipping_address(name='shipping_address', rows='3', required)= `${userAddress.street_address}\n${userAddress.city}, ${userAddress.state} ${userAddress.zip_code}\n${userAddress.country}`
+                  else
+                    textarea.form-control#shipping_address(name='shipping_address', rows='3', required, placeholder='Enter your shipping address')
+
+              // Meetup Location Section (hidden by default)
+              #meetup_location_section(style='display: none;')
+                .form-group.mt-3
+                  label(for='meetup_location') Meetup Location
+                  input.form-control#meetup_location(type='text', name='meetup_location', placeholder='Enter meetup location')
+                .form-group
+                  label(for='meetup_date') Meetup Date
+                  input.form-control#meetup_date(type='datetime-local', name='meetup_date')
+                
+              .d-flex.justify-content-between.mt-4
+                a.btn.btn-secondary(href='/products') Cancel
+                button.btn.btn-primary(type='submit') Send Request
 
 block scripts
   script.
-    document.getElementById('swapRequestForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
+    // Show/hide delivery method sections
+    document.getElementById('delivery_method').addEventListener('change', function() {
+      const shippingSection = document.getElementById('shipping_address_section');
+      const meetupSection = document.getElementById('meetup_location_section');
       
-      const formData = {
-        requested_item_id: this.requested_item_id.value,
-        offered_item_id: this.offered_item_id.value,
-        message: this.message.value,
-        delivery_method: this.delivery_method.value
-      };
+      if (this.value === 'shipping') {
+        shippingSection.style.display = 'block';
+        meetupSection.style.display = 'none';
+      } else if (this.value === 'meetup') {
+        shippingSection.style.display = 'none';
+        meetupSection.style.display = 'block';
+      } else {
+        shippingSection.style.display = 'none';
+        meetupSection.style.display = 'none';
+      }
+    });
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const deliveryMethod = document.getElementById('delivery_method').value;
+      const shippingAddress = document.getElementById('shipping_address');
+      const meetupLocation = document.getElementById('meetup_location');
+      const meetupDate = document.getElementById('meetup_date');
       
-      try {
-        const response = await fetch('/swap-requests', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formData)
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          window.location.href = '/swap-requests';
-        } else {
-          alert(data.message || 'Error creating swap request');
+      // Check if using existing items or new item
+      const activeTab = document.querySelector('.nav-tabs .active').id;
+      let isValid = true;
+      
+      if (activeTab === 'existing-tab') {
+        const checkedItems = document.querySelectorAll('input[name="offered_items[]"]:checked');
+        if (checkedItems.length === 0) {
+          alert('Please select at least one item to offer');
+          isValid = false;
         }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error creating swap request');
+      } else {
+        // Validate new item fields
+        const requiredFields = ['new_item_name', 'new_item_brand', 'new_item_category', 'new_item_size', 'new_item_condition'];
+        for (const fieldId of requiredFields) {
+          if (!document.getElementById(fieldId).value) {
+            alert('Please fill in all required fields for the new item');
+            isValid = false;
+            break;
+          }
+        }
+      }
+      
+      if (!deliveryMethod) {
+        alert('Please select a delivery method');
+        isValid = false;
+      } else if (deliveryMethod === 'shipping' && !shippingAddress.value) {
+        alert('Please enter your shipping address');
+        isValid = false;
+      } else if (deliveryMethod === 'meetup' && (!meetupLocation.value || !meetupDate.value)) {
+        alert('Please enter meetup location and date');
+        isValid = false;
+      }
+      
+      if (!isValid) {
+        e.preventDefault();
       }
     }); 

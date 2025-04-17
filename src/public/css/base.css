@@ -22,13 +22,14 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  margin-top: 96px; /* Changed from padding-top to margin-top */
 }
 
 /* Container */
 .container {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 120px 40px 40px;  /* Increased top padding to account for fixed header */
+  padding: 40px;  /* Reduced padding since we added padding to body */
   min-height: calc(100vh - 96px - 200px);  /* Account for header and footer height */
 }
 

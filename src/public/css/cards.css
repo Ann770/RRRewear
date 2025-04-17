@@ -122,6 +122,9 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s;
+  image-rendering: -webkit-optimize-contrast; /* Improve image quality */
+  image-rendering: crisp-edges; /* Improve image quality */
+  -ms-interpolation-mode: nearest-neighbor; /* Improve image quality */
 }
 
 .product-card:hover .product-image-container img {

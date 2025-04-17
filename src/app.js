@@ -622,7 +622,7 @@ app.get('/products', (req, res) => {
     res.render('products/index', { 
       title: 'All Products',
       products,
-      user: req.session.user
+      user: req.session.user 
     });
   });
 });
@@ -653,8 +653,8 @@ app.get('/products/add', isAuthenticated, (req, res) => {
         return res.redirect('/products');
       }
       
-      res.render('products/add', { 
-        title: 'Add Product',
+  res.render('products/add', { 
+    title: 'Add Product',
         user: req.session.user,
         brands: brands || [],
         categories: categories || []
@@ -703,35 +703,35 @@ app.post('/products/add', isAuthenticated, upload.single('image'), (req, res) =>
       }
 
       function insertClothingItem() {
-        // Insert clothing item
-        const query = `
-          INSERT INTO clothing_items (
-            user_id, brand_id, category_id, name, description, 
+      // Insert clothing item
+      const query = `
+        INSERT INTO clothing_items (
+          user_id, brand_id, category_id, name, description, 
             size, item_condition, material, color, image_url
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      
+      db.query(query, [
+        userId,
+        brandId,
+        category,
+        name,
+        description,
+        size,
+        condition,
+        material,
+        color,
+        imageUrl
+      ], (err, result) => {
+        if (err) {
+          console.error('Error adding product:', err);
+          req.flash('error_msg', 'Error adding product');
+          return res.redirect('/products/add');
+        }
         
-        db.query(query, [
-          userId,
-          brandId,
-          category,
-          name,
-          description,
-          size,
-          condition,
-          material,
-          color,
-          imageUrl
-        ], (err, result) => {
-          if (err) {
-            console.error('Error adding product:', err);
-            req.flash('error_msg', 'Error adding product');
-            return res.redirect('/products/add');
-          }
-          
-          req.flash('success_msg', 'Product added successfully');
+        req.flash('success_msg', 'Product added successfully');
           res.redirect('/products');
-        });
+      });
       }
     });
   } catch (error) {

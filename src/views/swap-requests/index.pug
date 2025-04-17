@@ -1,84 +1,92 @@
-extends ../layouts/main
+extends ../layout
 
 block content
-  .container.mt-4
-    h1.mb-4 My Swap Requests
-    .row
-      .col-md-12
-        if requests && requests.length > 0
+  .closet-container
+    .sidebar
+      .nav-options
+        a.nav-item(href="/profile")
+          i.fas.fa-user
+          span My Profile
+        a.nav-item(href="/closet")
+          i.fas.fa-tshirt
+          span My Closet
+        a.nav-item(href="/wishlist")
+          i.fas.fa-heart
+          span Wish List
+        a.nav-item.active(href="/swap-requests")
+          i.fas.fa-exchange-alt
+          span Swap Requests
+        a.nav-item(href="/logout")
+          i.fas.fa-sign-out-alt
+          span Logout
+
+    .main-content
+      h1.closet-title My Swap Requests
+      
+      if error
+        .alert.alert-danger= error
+      
+      if requests && requests.length > 0
+        .product-grid
           each request in requests
-            .card.mb-3
-              .card-body
-                .row
-                  .col-md-4
-                    h5.card-title Requested Item
-                    if request.requested_item
-                      img.img-fluid.mb-2(src=request.requested_item.image_url, alt=request.requested_item.title, style='max-height: 200px;')
-                      h6= request.requested_item.title
-                      p.text-muted= request.requested_item.brand_name
-                  .col-md-4
-                    h5.card-title Offered Item
-                    if request.offered_item
-                      img.img-fluid.mb-2(src=request.offered_item.image_url, alt=request.offered_item.title, style='max-height: 200px;')
-                      h6= request.offered_item.title
-                      p.text-muted= request.offered_item.brand_name
-                  .col-md-4
-                    h5.card-title Status
-                    p.badge(class={
-                      'bg-warning': request.status === 'pending',
-                      'bg-success': request.status === 'accepted',
-                      'bg-danger': request.status === 'rejected'
-                    })= request.status
-                    if request.message
-                      p.mt-2= request.message
-                    if request.status === 'pending' && request.receiver_id === user.user_id
-                      .mt-3
-                        button.btn.btn-success.me-2(onclick=`updateRequestStatus(${request.request_id}, 'accepted')`) Accept
-                        button.btn.btn-danger(onclick=`updateRequestStatus(${request.request_id}, 'rejected')`) Reject
-                    if request.status === 'pending' && request.requester_id === user.user_id
-                      .mt-3
-                        button.btn.btn-danger(onclick=`deleteRequest(${request.request_id})`) Delete Request
-        else
-          .alert.alert-info No swap requests found.
+            .product-card
+              .product-details
+                h3 Request #{request.request_id}
+                p.status
+                  strong Status: 
+                  span.badge(class=request.status === 'pending' ? 'bg-warning' : request.status === 'accepted' ? 'bg-success' : 'bg-danger')= request.status
+                p
+                  strong Requested Item: 
+                  a(href=`/products/${request.requested_item_id}`)= request.requested_item_name
+                p
+                  strong Offered Items:
+                  ul
+                    each item in request.offered_items
+                      li
+                        a(href=`/products/${item.item_id}`)= item.name
+                if request.message
+                  p
+                    strong Message: 
+                    = request.message
+                p
+                  small.text-muted Requested on: #{request.created_at}
+                if request.status === 'pending'
+                  button.btn.btn-danger.btn-sm.cancel-request(data-request-id=request.request_id) Cancel Request
+      else
+        .alert.alert-info
+          | You haven't made any swap requests yet. 
+          a(href="/products") Browse items
+          |  to make a request!
 
 block scripts
   script.
-    async function updateRequestStatus(requestId, status) {
-      try {
-        const response = await fetch(`/swap-requests/${requestId}/status`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ status })
-        });
-        
-        if (response.ok) {
-          window.location.reload();
-        } else {
-          alert('Failed to update request status');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while updating the request status');
-      }
-    }
-
-    async function deleteRequest(requestId) {
-      if (confirm('Are you sure you want to delete this swap request?')) {
-        try {
-          const response = await fetch(`/swap-requests/${requestId}`, {
-            method: 'DELETE'
-          });
-          
-          if (response.ok) {
-            window.location.reload();
-          } else {
-            alert('Failed to delete request');
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle cancel request
+      document.querySelectorAll('.cancel-request').forEach(button => {
+        button.addEventListener('click', async function() {
+          const requestId = this.dataset.requestId;
+          if (confirm('Are you sure you want to cancel this swap request?')) {
+            try {
+              const response = await fetch(`/swap-requests/${requestId}`, {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              });
+              const data = await response.json();
+              if (data.success) {
+                // Remove the card from the UI
+                this.closest('.product-card').remove();
+                // Show success message
+                alert('Swap request cancelled successfully');
+              } else {
+                alert(data.message || 'Error cancelling request');
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              alert('Error cancelling request');
+            }
           }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('An error occurred while deleting the request');
-        }
-      }
-    } 
+        });
+      });
+    }); 

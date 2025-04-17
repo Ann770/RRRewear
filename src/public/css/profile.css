@@ -1,17 +1,32 @@
 /* Profile Page Styles */
-.profile-container {
+.profile-container,
+.wishlist-container,
+.swap-requests-container {
+  margin-top: 96px; /* Match the header height */
+  padding: 20px;
+  min-height: calc(100vh - 96px - 200px); /* Account for header and footer */
   display: flex;
-  min-height: calc(100vh - 96px);
+  gap: 20px;
+  overflow-y: auto; /* Enable vertical scrolling */
+  height: calc(100vh - 96px); /* Full viewport height minus header */
 }
 
 .sidebar {
   width: 285px;
-  height: 935px;
+  min-width: 285px;
+  height: fit-content;
   background-color: #B9CFD9;
   padding: 20px 0;
-  position: fixed;
-  left: 0;
+  position: sticky;
   top: 96px;
+  border-radius: 8px;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0; /* Prevents flex item from overflowing */
+  overflow-y: auto; /* Enable vertical scrolling */
+  height: 100%; /* Take full height of container */
 }
 
 .nav-options {
@@ -45,21 +60,23 @@
 
 .profile-header {
   display: flex;
-  gap: 40px;
-  margin-bottom: 40px;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
 .profile-picture {
-  width: 268px;
-  height: 198px;
   position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .profile-picture img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 8px;
 }
 
 .edit-picture {
@@ -244,4 +261,25 @@
     transform: translateX(0);
     opacity: 1;
   }
+}
+
+/* Wishlist specific styles */
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Swap Requests specific styles */
+.swap-requests-list {
+  margin-top: 20px;
+}
+
+.swap-request-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 } 

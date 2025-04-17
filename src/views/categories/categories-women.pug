@@ -9,6 +9,7 @@ block content
         a.category-link(href="/categories/men") Men
 
     .products-section
+<<<<<<< Updated upstream
       if error
         .error-message
           p= error
@@ -52,3 +53,17 @@ block content
 
 block scripts
   script(src='/js/products.js') 
+=======
+      .product-grid
+        each product in products
+          .product-card
+            .product-image
+              img(src=product.image, alt=product.name)
+            .product-details
+              h3 #{product.name}
+              p.brand #{product.brand}
+              p.size Size: #{product.size}
+              p.condition Condition: #{product.condition}
+              p.material Material: #{product.material}
+              p.color Color: #{product.color} 
+>>>>>>> Stashed changes

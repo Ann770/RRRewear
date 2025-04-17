@@ -2,64 +2,74 @@ extends ../layouts/main
 
 block content
   .container.mt-4
+    h1.mb-4 Swap Request Details
+    if error_msg
+      .alert.alert-danger #{error_msg}
+    
     .row
-      .col-md-8.mx-auto
-        .card
+      .col-md-6
+        .card.mb-4
+          .card-header
+            h5.mb-0 Requested Item
           .card-body
-            h2.mb-4 Swap Request Details
-            .row.mb-4
-              .col-md-6
-                h4 Requested Item
-                if request.requested_item
-                  .card
-                    .card-body
-                      img.img-fluid.mb-3(src=request.requested_item.image_url, alt=request.requested_item.title)
-                      h5= request.requested_item.title
-                      p
-                        strong Brand: 
-                        = request.requested_item.brand_name
-                      p
-                        strong Size: 
-                        = request.requested_item.size
-                      p
-                        strong Condition: 
-                        = request.requested_item.condition
-              .col-md-6
-                h4 Offered Item
-                if request.offered_item
-                  .card
-                    .card-body
-                      img.img-fluid.mb-3(src=request.offered_item.image_url, alt=request.offered_item.title)
-                      h5= request.offered_item.title
-                      p
-                        strong Brand: 
-                        = request.offered_item.brand_name
-                      p
-                        strong Size: 
-                        = request.offered_item.size
-                      p
-                        strong Condition: 
-                        = request.offered_item.condition
+            img.img-fluid.mb-3(src=request.requested_item_image, alt=request.requested_item_name)
+            h5 #{request.requested_item_name}
+            p
+              strong Owner: 
+              | #{request.receiver_name}
+              br
+              strong Size: 
+              | #{request.requested_item_size}
+              br
+              strong Material: 
+              | #{request.requested_item_material}
+              br
+              strong Condition: 
+              | #{request.requested_item_condition}
+            p #{request.requested_item_description}
+      
+      .col-md-6
+        .card.mb-4
+          .card-header
+            h5.mb-0 Swap Details
+          .card-body
+            p
+              strong Status: 
+              span.badge(class=request.status === 'accepted' ? 'bg-success' : request.status === 'declined' ? 'bg-danger' : 'bg-warning')
+                | #{request.status}
+              br
+              strong Requested by: 
+              | #{request.requester_name}
+              br
+              strong Message: 
+              | #{request.message}
             
-            .mb-4
-              h4 Message
-              p= request.message
-            
-            .mb-4
-              h4 Status
-              if request.status === 'pending'
-                span.badge.bg-warning Pending
-              else if request.status === 'accepted'
-                span.badge.bg-success Accepted
-              else if request.status === 'rejected'
-                span.badge.bg-danger Rejected
-            
-            if request.status === 'pending' && request.receiver_id === user.id
-              .d-flex.gap-2
-                button.btn.btn-success(onclick=`updateRequestStatus('${request.request_id}', 'accepted')`) Accept Request
-                button.btn.btn-danger(onclick=`updateRequestStatus('${request.request_id}', 'rejected')`) Reject Request
-            else if request.status === 'pending' && request.requester_id === user.id
-              button.btn.btn-danger(onclick=`deleteRequest('${request.request_id}')`) Delete Request
+            if request.status === 'pending' && request.receiver_id === user.user_id
+              .d-flex.gap-2.mt-3
+                form(action=`/swap-requests/${request.request_id}/accept`, method="POST")
+                  button.btn.btn-success(type="submit") Accept Swap
+                form(action=`/swap-requests/${request.request_id}/reject`, method="POST")
+                  button.btn.btn-danger(type="submit") Reject Swap
+    
+    if request.status === 'accepted'
+      .card.mb-4
+        .card-header
+          h5.mb-0 Messages
+        .card-body
+          if messages.length === 0
+            p.text-muted No messages yet.
+          else
+            each message in messages
+              .message.mb-3
+                .d-flex.justify-content-between
+                  strong #{message.sender_name}
+                  small.text-muted #{message.created_at}
+                p.mb-0 #{message.content}
+          
+          form(action=`/swap-requests/${request.request_id}/messages`, method="POST")
+            .form-group.mb-3
+              textarea.form-control(name="content", rows="3", placeholder="Type your message...", required)
+            button.btn.btn-primary(type="submit") Send Message
 
 block scripts
   script.

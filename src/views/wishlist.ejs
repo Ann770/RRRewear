@@ -1,6 +1,6 @@
 <%- include('partials/header') %>
 
-<div class="container mt-4">
+<div class="wishlist-container">
     <h1 class="mb-4">My Wishlist</h1>
     
     <% if (items && items.length > 0) { %>
@@ -36,7 +36,7 @@
         </div>
     <% } else { %>
         <div class="alert alert-info">
-            Your wishlist is empty. Browse the available items and add them to your wishlist!
+            Your wishlist is empty. <a href="/products">Browse items</a> to add some!
         </div>
     <% } %>
 </div>
