@@ -1,0 +1,174 @@
+extends ../layouts/main
+
+block content
+  .container.mt-4
+    if error_msg
+      .alert.alert-danger= error_msg
+
+    .row
+      // Requested Item
+      .col-md-6
+        .card.mb-4
+          .card-body
+            if requestedItem.image_url
+              img.img-fluid.mb-3(src=requestedItem.image_url, alt=requestedItem.name)
+            h5= requestedItem.name
+            p
+              strong Owner: 
+              = requestedItem.owner_name
+            p
+              strong Brand: 
+              = requestedItem.brand_name
+            p
+              strong Category: 
+              = requestedItem.category_name
+            p
+              strong Size: 
+              = requestedItem.size
+            p
+              strong Condition: 
+              = requestedItem.condition
+            p
+              strong Description: 
+              = requestedItem.description
+
+      // User's Items to Offer
+      .col-md-6
+        .card
+          .card-body
+            form(action='/swap-requests', method='POST', enctype='multipart/form-data')
+              input(type='hidden', name='requested_item_id', value=requestedItem.item_id)
+              
+              if userItems && userItems.length > 0
+                .form-group
+                  label(for='offered_items') Select Item to Swap
+                  select.form-control#offered_items(name='offered_items[]', required)
+                    option(value='') Choose an item...
+                    each item in userItems
+                      option(value=item.item_id)
+                        = item.name
+                        |  (
+                        = item.brand_name
+                        | , 
+                        = item.size
+                        | )
+              
+                .form-group.mt-3
+                  label(for='message') Message (Optional)
+                  textarea.form-control#message(name='message', rows='3')
+                
+                .form-group.mt-3
+                  label(for='delivery_method') Delivery Method
+                  select.form-control#delivery_method(name='delivery_method', required)
+                    option(value='') Select delivery method...
+                    option(value='meetup') Meet Up
+                    option(value='shipping') Shipping
+                
+                #meetup_details(style='display: none;')
+                  .form-group.mt-3
+                    label(for='meetup_location') Meet Up Location
+                    input.form-control#meetup_location(type='text', name='meetup_location')
+                  .form-group.mt-3
+                    label(for='meetup_date') Meet Up Date
+                    input.form-control#meetup_date(type='datetime-local', name='meetup_date')
+                
+                #shipping_details(style='display: none;')
+                  .form-group.mt-3
+                    label(for='shipping_address') Shipping Address
+                    textarea.form-control#shipping_address(name='shipping_address', rows='3')
+                
+                .d-flex.justify-content-between.mt-4
+                  a.btn.btn-secondary(href='/products') Cancel
+                  button.btn.btn-primary(type='submit') Send Request
+              else
+                .alert.alert-warning
+                  | You don't have any items available to offer for swap. 
+                  a(href='/products/add') Add some items
+                  |  first.
+
+                // New Item Form
+                .new-item-form.mt-4
+                  h4 Add New Item to Swap
+                  .form-group
+                    label(for='new_item_name') Item Name
+                    input.form-control#new_item_name(type='text', name='new_item_name', required)
+                  
+                  .form-group.mt-3
+                    label(for='new_item_brand') Brand
+                    select.form-control#new_item_brand(name='new_item_brand', required)
+                      option(value='') Select brand...
+                      each brand in brands
+                        option(value=brand.brand_id)= brand.name
+                  
+                  .form-group.mt-3
+                    label(for='new_item_category') Category
+                    select.form-control#new_item_category(name='new_item_category', required)
+                      option(value='') Select category...
+                      each category in categories
+                        option(value=category.category_id)= category.name
+                  
+                  .form-group.mt-3
+                    label(for='new_item_size') Size
+                    input.form-control#new_item_size(type='text', name='new_item_size', required)
+                  
+                  .form-group.mt-3
+                    label(for='new_item_condition') Condition
+                    select.form-control#new_item_condition(name='new_item_condition', required)
+                      option(value='') Select condition...
+                      option(value='new') New
+                      option(value='like_new') Like New
+                      option(value='good') Good
+                      option(value='fair') Fair
+                  
+                  .form-group.mt-3
+                    label(for='new_item_description') Description
+                    textarea.form-control#new_item_description(name='new_item_description', rows='3', required)
+                  
+                  .form-group.mt-3
+                    label(for='new_item_image') Item Image
+                    input.form-control#new_item_image(type='file', name='new_item_image', accept='image/*', required)
+                  
+                  .form-group.mt-3
+                    label(for='delivery_method') Delivery Method
+                    select.form-control#delivery_method(name='delivery_method', required)
+                      option(value='') Select delivery method...
+                      option(value='meetup') Meet Up
+                      option(value='shipping') Shipping
+                  
+                  #meetup_details(style='display: none;')
+                    .form-group.mt-3
+                      label(for='meetup_location') Meet Up Location
+                      input.form-control#meetup_location(type='text', name='meetup_location')
+                    .form-group.mt-3
+                      label(for='meetup_date') Meet Up Date
+                      input.form-control#meetup_date(type='datetime-local', name='meetup_date')
+                  
+                  #shipping_details(style='display: none;')
+                    .form-group.mt-3
+                      label(for='shipping_address') Shipping Address
+                      textarea.form-control#shipping_address(name='shipping_address', rows='3')
+                  
+                  .d-flex.justify-content-between.mt-4
+                    a.btn.btn-secondary(href='/products') Cancel
+                    button.btn.btn-primary(type='submit') Send Request
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      const deliveryMethod = document.getElementById('delivery_method');
+      const meetupDetails = document.getElementById('meetup_details');
+      const shippingDetails = document.getElementById('shipping_details');
+
+      deliveryMethod.addEventListener('change', function() {
+        if (this.value === 'meetup') {
+          meetupDetails.style.display = 'block';
+          shippingDetails.style.display = 'none';
+        } else if (this.value === 'shipping') {
+          meetupDetails.style.display = 'none';
+          shippingDetails.style.display = 'block';
+        } else {
+          meetupDetails.style.display = 'none';
+          shippingDetails.style.display = 'none';
+        }
+      });
+    }); 
