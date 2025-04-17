@@ -1,0 +1,36 @@
+extends ../layouts/main
+
+block content
+  .container.mt-4
+    h1.mb-4 Items Available for Swap
+    if error_msg
+      .alert.alert-danger #{error_msg}
+    
+    .row
+      each item in items
+        .col-md-4.mb-4
+          .card.h-100
+            img.card-img-top(src=item.image_url, alt=item.name)
+            .card-body
+              h5.card-title #{item.name}
+              p.card-text
+                strong Owner: 
+                | #{item.owner_name}
+                br
+                strong Brand: 
+                | #{item.brand_name}
+                br
+                strong Category: 
+                | #{item.category_name}
+                br
+                strong Size: 
+                | #{item.size}
+                br
+                strong Material: 
+                | #{item.material}
+                br
+                strong Condition: 
+                | #{item.condition}
+              p.card-text #{item.description}
+            .card-footer
+              a.btn.btn-primary(href=`/swap-requests/new?item_id=${item.item_id}`) Request Swap 

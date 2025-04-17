@@ -1,0 +1,53 @@
+extends ../layouts/main
+
+block content
+  .container.mt-4
+    h1.mb-4 Similar Items for Swap
+    if similarItems.length === 0
+      .alert.alert-info No similar items found for your listings.
+    else
+      each group in similarItems
+        .card.mb-4
+          .card-header
+            h5.mb-0 Your Item: #{group.user_item.name}
+          .card-body
+            .row
+              .col-md-3
+                img.img-fluid(src=group.user_item.image_url, alt=group.user_item.name)
+                p.mt-2
+                  strong Brand: 
+                  | #{group.user_item.brand_name}
+                  br
+                  strong Category: 
+                  | #{group.user_item.category_name}
+                  br
+                  strong Size: 
+                  | #{group.user_item.size}
+                  br
+                  strong Material: 
+                  | #{group.user_item.material}
+                  br
+                  strong Condition: 
+                  | #{group.user_item.item_condition}
+              .col-md-9
+                h5 Similar Items from Other Users:
+                .row
+                  each item in group.similar_items
+                    .col-md-4.mb-3
+                      .card.h-100
+                        img.card-img-top(src=item.image_url, alt=item.name)
+                        .card-body
+                          h6.card-title #{item.name}
+                          p.card-text
+                            small
+                              | Owner: #{item.owner_name}
+                              br
+                              | Brand: #{item.brand_name}
+                              br
+                              | Size: #{item.size}
+                              br
+                              | Material: #{item.material}
+                              br
+                              | Condition: #{item.item_condition}
+                        .card-footer
+                          a.btn.btn-primary.btn-sm(href=`/swap-requests/new?item_id=${item.item_id}`) Request Swap 

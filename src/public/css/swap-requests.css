@@ -1,0 +1,130 @@
+/* Swap Request Form Styles */
+.swap-request-form {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Tab Styles */
+.nav-tabs {
+  border-bottom: 2px solid #dee2e6;
+  margin-bottom: 20px;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  padding: 10px 20px;
+  margin-right: 5px;
+  border-radius: 4px 4px 0 0;
+}
+
+.nav-tabs .nav-link.active {
+  color: #007bff;
+  background-color: #fff;
+  border: 2px solid #dee2e6;
+  border-bottom-color: #fff;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+  border-color: transparent;
+  background-color: #f8f9fa;
+}
+
+/* Form Card Styles */
+.card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 15px;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* Item Selection Styles */
+.form-check {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.form-check:hover {
+  background-color: #f8f9fa;
+}
+
+.form-check-input:checked + .form-check-label {
+  background-color: #e3f2fd;
+}
+
+/* Image Styles */
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+/* Delivery Method Styles */
+#shipping_address_section,
+#meetup_location_section {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+/* Button Styles */
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  padding: 10px 20px;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  padding: 10px 20px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .swap-request-form {
+    padding: 10px;
+  }
+  
+  .nav-tabs .nav-link {
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+  
+  .card-body {
+    padding: 15px;
+  }
+}
+
+/* Form Validation Styles */
+.alert {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+} 
